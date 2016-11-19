@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1479314247 source:c:\users\zzh\desktop\program\test\compiler.cpp
+	<string.h>
+	<stdbool.h>
+	<stdio.h>
+	<cstdlib>
+	"Compiler.h"
+
+1479301486 c:\users\zzh\desktop\program\test\compiler.h
+
