@@ -5,7 +5,9 @@
 #ifndef COMPILER_COMPILER_H
 #define COMPILER_COMPILER_H
 
-//using namespace std;
+#include <string>
+
+using namespace std;
 
 typedef enum {
     noneTyp,//NULL
@@ -40,7 +42,7 @@ typedef enum {
     smallAndEql,//<=
     notEql,//!=
     eql,//==
-    plus,//+
+    Plus,//+
     sub,//-
     mul,//*
     Div,///
@@ -60,29 +62,46 @@ typedef enum {
 } ReservedWord;
 
 typedef enum {
-    qAdd,//加
+    qNewIntCons,
+    qNewCharCons,
+    qNewIntVar,
+    qNewCharVar,
+    qNewIntArray,
+    qNewCharArray,
+    qLabel,
+    qFuncLabel,
+    qFuncEndLabel,
+    qCallFunc,//调用函数
+    qPlus,//加
     qSub,//减
     qMul,//乘
     qDiv,//除
-    qJa,//a > b 跳转
-    qJb,//a < b 跳转
+    qJg,//a > b 跳转
+    qJl,//a < b 跳转
     qJe,//a == b 跳转
     qJne,//a != b 跳转
-    qJbe,//a >= b 跳转
+    qJge,//a >= b 跳转
     qJle,//a <= b 跳转
-    qReverse,//a取反
-    qAssign,//赋值
-    qCall,//调用函数
-    qPrintf,//输出
-    qScanf,//输入
     qJ,//无条件跳转
+    qGetArrayValue,//取数组值
+    qAssignInt,//赋值
+    qAssignChar,//赋值
+    qReverse,//a取反
+    qPassParam,//传参
+    qReturn,//返回
+    qScanf,//输入
+    qPrintf,//输出
+    qSaveAddr,//存入内存
+    qLoadAddr//加载至寄存器
 } QuadCodeInstr;
 
+//间隔符
 typedef struct {
     char symbol;
     ReservedWord reservedWord;
 } Interval;
 
+//关键字
 typedef struct {
     char* symbol;
     ReservedWord reservedWord;
@@ -91,7 +110,7 @@ typedef struct {
 
 //符号表项
 typedef struct {
-    char name[1024];//token名
+    string name;//token名
     ReservedWord obj;//种类（常量，变量，函数，字符串）
     ReservedWord type;//类型（整型，字符型, Void）
     bool isArray = false;//是否是数组
@@ -118,9 +137,9 @@ typedef struct {
 //四元式表项
 typedef struct {
     QuadCodeInstr quadCodeInstr;//四元式指令
-    char operand1[1024];//操作数1
-    char operand2[1024];//操作数2
-    char result[1024];//结果
+    string operand1;//操作数1
+    string operand2;//操作数2
+    string result;//结果
 } QuadCodeTableItem;
 
 //函数参数表项
@@ -158,6 +177,83 @@ char* symbolTypeToString;
 int symPos = 0;
 int intervalsLength;
 int keywordsLength;
+QuadCodeTableItem qCodeInstrs[1024];
+
+int qCodePointer = 0;
+int labelPointer = 0;
+int tmpVarPointer = 0;
+
+string currentDealFunc = "";
+//string label1;
+//string label2;
+//string label3;
+
+
+string getStrQCode(QuadCodeInstr instr) {
+    if(instr == qNewIntCons)
+        return "qNewIntCons";
+    if(instr == qNewCharCons)
+        return "qNewCharCons";
+    if(instr == qNewIntVar)
+        return "qNewIntVar";
+    if(instr == qNewCharVar)
+        return "qNewCharVar";
+    if(instr == qNewIntArray)
+        return "qNewIntArray";
+    if(instr == qNewCharArray)
+        return "qNewCharArray";
+    if(instr == qFuncLabel)
+        return "qFuncLabel";
+    if(instr == qFuncEndLabel)
+        return "qFuncEndLabel";
+    if(instr == qLabel)
+        return "qLabel";
+    if(instr == qCallFunc)
+        return "qCallFunc";
+    if(instr == qPlus)
+        return "qPlus";
+    if(instr == qSub)
+        return "qSub";
+    if(instr == qMul)
+        return "qMul";
+    if(instr == qDiv)
+        return "qDiv";
+    if(instr == qJg)
+        return "qJg";
+    if(instr == qJl)
+        return "qJl";
+    if(instr == qJe)
+        return "qJe";
+    if(instr == qJne)
+        return "qJne";
+    if(instr == qJge)
+        return "qJge";
+    if(instr == qJle)
+        return "qJle";
+    if(instr == qJ)
+        return "qJ";
+    if(instr == qGetArrayValue)
+        return "qGetArrayValue";
+    if(instr == qAssignInt)
+        return "qAssignInt";
+    if(instr == qAssignChar)
+        return "qAssignChar";
+    if(instr == qReverse)
+        return "qReverse";
+    if(instr == qPassParam)
+        return "qPassParam";
+    if(instr == qReturn)
+        return "qReturn";
+    if(instr == qScanf)
+        return "qScanf";
+    if(instr == qPrintf)
+        return "qPrintf";
+    if(instr == qSaveAddr)
+        return "qSaveAddr";
+    if(instr == qLoadAddr)
+        return "qLoadAddr";
+    return "errType";
+}
 
 
 #endif //COMPILER_COMPILER_H
