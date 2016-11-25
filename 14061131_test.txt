@@ -1,7 +1,7 @@
 const int _x = 0, m = 2;
 const char y = 'b';
-int z, h;
-char m, i;
+int z, h[20];
+char m, i[10];
 
 int foo(int a, int b)
 {

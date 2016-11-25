@@ -104,7 +104,11 @@ typedef enum {
     qPassParam,//传参
     qReturn,//返回
     qScanf,//输入
+    qScanfInt,//输入
+    qScanfChar,//输入
     qPrintf,//输出
+    qPrintfString,//输出
+    qPrintfInt,//输出
     qSaveAddr,//存入内存
     qLoadAddr//加载至寄存器
 } QuadCodeInstr;
@@ -142,10 +146,10 @@ typedef struct {
 
 //代码表项
 typedef struct {
-    char name[1024];//指令名
-    char operand1[1024];//第一个操作数
-    char operand2[1024];//第二个操作数
-    char operand3[1024];//第三个操作数
+    string name;//指令名
+    string operand1;//第一个操作数
+    string operand2;//第二个操作数
+    string operand3;//第三个操作数
 } CodeTableItem;
 
 //四元式表项

@@ -1,0 +1,17 @@
+
+void main(){
+
+	if(0){
+		printf("*****");		printf("is 0");
+	}
+	else{
+		printf("*****");
+		printf(div2(b-2));
+		printf("isnot 0");
+	}
+	if(a * 10 - add3(a) + (b+c) / a)
+		printf("yes");
+	x = x * b * a;
+	scanf(m1);
+
+}

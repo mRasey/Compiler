@@ -5,6 +5,19 @@
 #ifndef COMPILER_GENERATE_H
 #define COMPILER_GENERATE_H
 
-void generate() ;
+#include "Analysis.h"
+
+typedef struct {
+    string name;//变量名
+    string belongFunc;//所属函数
+    int value;//变量值
+} TmpVarItem;
+
+typedef struct {
+
+} MipsTableItem;
+
+void generateOverallConst() ;
+void generateAll() ;
 
 #endif //COMPILER_GENERATE_H
