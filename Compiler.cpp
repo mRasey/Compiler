@@ -14,7 +14,6 @@
 
 void printTokenTable() ;
 void printFuncParamTable() ;
-void init() ;
 bool isinterval(char c) ;
 bool isKeyword(char* s) ;
 bool isNumber(char* s) ;
@@ -25,7 +24,6 @@ string getNextLabel() ;
 string getNextTmpVar() ;
 void printAllQCode() ;
 string getFuncLabel(string funcName) ;
-
 char getNextChar() ;
 void pushBackChar() ;
 void clearSymbol() ;
@@ -36,14 +34,16 @@ char* getTypeToString(char* symbol) ;
 void output(char* s) ;
 void printAllSymbol() ;
 void jumpToNextLine() ;
-int findTokenInTable(char* symbol) ;
+int findTokenInTable(string symbol) ;
 bool findFuncParamTable(TokenTableItem* tti, char* symbol) ;
+vector<string> findInAllTable(string symbol) ;
 void dealOverallConst() ;
 void dealInnerConst(TokenTableItem *ptr);
 void dealOverallVar(ReservedWord recordType) ;
 void dealInnerVar(TokenTableItem *tti, ReservedWord param);
-string dealAssign() ;
-string dealCallFunc(TokenTableItem tti) ;
+void dealAssign() ;
+void dealPassParam(int index) ;
+string dealCallFunc(int index) ;
 string dealFactor() ;
 string dealTerm() ;
 string dealExpression() ;
@@ -108,131 +108,8 @@ void printTokenTable() {
 void printFuncParamTable() {
     for(int i = 0; i < funcParamTablePointer; i++) {
         FuncParamTableItem *fpti = &funcParamTable[i];
-        printf("%s\n", fpti->name);
+        printf("%s\n", fpti->name.c_str());
     }
-}
-
-/**
- * 初始化间隔符
- */
-void init() {
-    intervals[0].symbol = '+';
-    intervals[1].symbol = '-';
-    intervals[2].symbol = '*';
-    intervals[3].symbol = '/';
-    intervals[4].symbol = '>';
-    intervals[5].symbol = '<';
-    intervals[6].symbol = '=';
-    intervals[7].symbol = '{';
-    intervals[8].symbol = '}';
-    intervals[9].symbol = '[';
-    intervals[10].symbol = ']';
-    intervals[11].symbol = '(';
-    intervals[12].symbol = ')';
-    intervals[13].symbol = '\'';
-    intervals[14].symbol = '\"';
-    intervals[15].symbol = ':';
-    intervals[16].symbol = ';';
-    intervals[17].symbol = ',';
-    intervals[18].symbol = ' ';
-    intervals[19].symbol = '\n';
-    intervals[20].symbol = '!';
-    intervalsLength = 21;
-
-    keywords[0].symbol = "int";
-    keywords[0].reservedWord = Int;
-    keywords[0].rwToString = "Int";
-    keywords[1].symbol = "char";
-    keywords[1].reservedWord = Char;
-    keywords[1].rwToString = "Char";
-    keywords[2].symbol = "for";
-    keywords[2].reservedWord = For;
-    keywords[2].rwToString = "For";
-    keywords[3].symbol = "while";
-    keywords[3].reservedWord = While;
-    keywords[3].rwToString = "While";
-    keywords[4].symbol = "do";
-    keywords[4].reservedWord = Do;
-    keywords[4].rwToString = "Do";
-    keywords[5].symbol = "if";
-    keywords[5].reservedWord = If;
-    keywords[5].rwToString = "If";
-    keywords[6].symbol = "else";
-    keywords[6].reservedWord = Else;
-    keywords[6].rwToString = "Else";
-    keywords[7].symbol = "printf";
-    keywords[7].reservedWord = Printf;
-    keywords[7].rwToString = "Printf";
-    keywords[8].symbol = "scanf";
-    keywords[8].reservedWord = Scanf;
-    keywords[8].rwToString = "Scanf";
-    keywords[9].symbol = "const";
-    keywords[9].reservedWord = Const;
-    keywords[9].rwToString = "Const";
-    keywords[10].symbol = ">";
-    keywords[10].reservedWord = big;
-    keywords[10].rwToString = "Big";
-    keywords[11].symbol = "<";
-    keywords[11].reservedWord = small;
-    keywords[11].rwToString = "small";
-    keywords[12].symbol = ">=";
-    keywords[12].reservedWord = bigAndEql;
-    keywords[12].rwToString = "bigAndEql";
-    keywords[13].symbol = "<=";
-    keywords[13].reservedWord = smallAndEql;
-    keywords[13].rwToString = "smallAndEql";
-    keywords[14].symbol = "==";
-    keywords[14].reservedWord = eql;
-    keywords[14].rwToString = "eql";
-    keywords[15].symbol = "=";
-    keywords[15].reservedWord = assign;
-    keywords[15].rwToString = "assign";
-    keywords[16].symbol = "!=";
-    keywords[16].reservedWord = notEql;
-    keywords[16].rwToString = "notEql";
-    keywords[17].symbol = "+";
-    keywords[17].reservedWord = Plus;
-    keywords[17].rwToString = "plus";
-    keywords[18].symbol = "-";
-    keywords[18].reservedWord = sub;
-    keywords[18].rwToString = "sub";
-    keywords[19].symbol = "*";
-    keywords[19].reservedWord = mul;
-    keywords[19].rwToString = "mul";
-    keywords[20].symbol = "/";
-    keywords[20].reservedWord = Div;
-    keywords[20].rwToString = "Div";
-    keywords[21].symbol = "{";
-    keywords[21].reservedWord = lBrace;
-    keywords[21].rwToString = "lBrace";
-    keywords[22].symbol = "}";
-    keywords[22].reservedWord = rBrace;
-    keywords[22].rwToString = "rBrace";
-    keywords[23].symbol = "[";
-    keywords[23].reservedWord = lBracket;
-    keywords[23].rwToString = "lBracket";
-    keywords[24].symbol = "]";
-    keywords[24].reservedWord = rBracket;
-    keywords[24].rwToString = "rBracket";
-    keywords[25].symbol = "(";
-    keywords[25].reservedWord = lParent;
-    keywords[25].rwToString = "lParent";
-    keywords[26].symbol = ")";
-    keywords[26].reservedWord = rParent;
-    keywords[26].rwToString = "rParent";
-    keywords[27].symbol = ":";
-    keywords[27].reservedWord = colon;
-    keywords[27].rwToString = "colon";
-    keywords[28].symbol = ",";
-    keywords[28].reservedWord = comma;
-    keywords[28].rwToString = "comma";
-    keywords[29].symbol = ";";
-    keywords[29].reservedWord = semicolon;
-    keywords[29].rwToString = "semicolon";
-    keywords[30].symbol = "void";
-    keywords[30].reservedWord = Void;
-    keywords[30].rwToString = "Void";
-    keywordsLength = 31;
 }
 
 /**
@@ -255,7 +132,7 @@ bool isinterval(char c) {
  */
 bool isKeyword(char* s) {
     for(int i = 0; i < keywordsLength; i++) {
-        if(strcpy(keywords[i].symbol, s) == 0)
+        if(keywords[i].symbol == s)
             return true;
     }
     return false;
@@ -316,7 +193,7 @@ string ctoa(char c) {
  * @return 生成的标签
  */
 string getNextLabel() {
-    return "label_" + itoa(labelPointer) + ":";
+    return "label_" + itoa(labelPointer++) + ":";
 }
 
 /**
@@ -324,7 +201,7 @@ string getNextLabel() {
  * @return
  */
 string getNextTmpVar() {
-    return "T" + itoa(tmpVarPointer++);
+    return "#" + itoa(tmpVarPointer++);
 }
 
 /**
@@ -357,10 +234,10 @@ void printAllQCode() {
 //             << qCodeInstrs[i].operand2 + "\t\t"
 //             << qCodeInstrs[i].result << std::endl;
 
-        std::cout << left << setw(15) << getStrQCode(qCodeInstrs[i].quadCodeInstr);
-        std::cout << left << setw(10) << qCodeInstrs[i].operand1;
-        std::cout << left << setw(10) << qCodeInstrs[i].operand2;
-        std::cout << left << setw(10) << qCodeInstrs[i].result << std::endl;
+        std::cout << left << setw(20) << getStrQCode(qCodeInstrs[i].quadCodeInstr);
+        std::cout << left << setw(15) << qCodeInstrs[i].operand1;
+        std::cout << left << setw(15) << qCodeInstrs[i].operand2;
+        std::cout << left << setw(15) << qCodeInstrs[i].result << std::endl;
     }
 }
 
@@ -559,7 +436,7 @@ void jumpToNextLine() {
  * @param symbol 要寻找的符号
  * @return 找到的token的下标，如果没有找到返回0
  */
-int findTokenInTable(char* symbol) {
+int findTokenInTable(string symbol) {
     for(int i = tokenTablePointer; i > 0; i--) {
         TokenTableItem tti = tokenTable[i];
         if(tti.name == symbol)
@@ -578,11 +455,55 @@ bool findFuncParamTable(TokenTableItem* tti, char* symbol) {
     int paramCount = tti->paramAccount;//找到参数的数目
     int localVarCount = tti->localVarAccount;//找到局部变量的数目
     for(int i = startIndex; i < startIndex + paramCount + localVarCount; i++) {
-        if(strcmp(funcParamTable[i].name, symbol) == 0)
+        if(funcParamTable[i].name == symbol)
             return true;
     }
     return false;
 }
+
+vector<string> findInAllTable(string symbol) {
+    vector<string> result;
+    int index = findTokenInTable(currentDealFunc);//获得当前处理的函数在符号表中的位置
+    TokenTableItem tti = tokenTable[index];
+    int startIndex = tti.paramAddr;
+    int paramAccount = tti.paramAccount;
+    int localVarAccount = tti.localVarAccount;
+    for(int i = startIndex; i < startIndex + paramAccount; i++) {
+        FuncParamTableItem fpti = funcParamTable[i];
+        if(fpti.name == symbol) {
+            result.push_back("true");
+            result.push_back("param");
+            result.push_back(itoa(i));
+            return result;
+        }
+    }
+    for(int i = startIndex + paramAccount; i < startIndex + paramAccount + localVarAccount; i++) {
+        FuncParamTableItem fpti = funcParamTable[i];
+        if(fpti.name == symbol) {
+            result.push_back("true");
+            result.push_back("localVar");
+            result.push_back(itoa(i));
+            return result;
+        }
+    }
+    for(int i = tokenTablePointer; i > 0; i--) {
+        tti = tokenTable[i];
+        if(tti.name == symbol) {
+            result.push_back("true");
+            result.push_back("overall");
+            result.push_back(itoa(i));
+            return result;
+        }
+    }
+    result.push_back("false");
+    result.push_back("unexist");
+    result.push_back(itoa(0));
+    return  result;
+}
+
+
+
+
 
 /**
  * 处理全局常量声明
@@ -660,7 +581,8 @@ void dealInnerConst(TokenTableItem *tti) {
                     fpti->type = Int;//记录类型
                     fpti->obj = Const;//记录种类
 //                    getNextSymbolAndType();//读取常量名
-                    strcpy(fpti->name, symbol);//记录变量名
+                    fpti->name = symbol;//记录变量名
+//                    strcpy(fpti->name, symbol);//记录变量名
                     getNextSymbolAndType();//读取=号
                     //todo 容错
                     getNextSymbol();//读取常量值
@@ -693,7 +615,8 @@ void dealInnerConst(TokenTableItem *tti) {
                     fpti->type = Char;//记录类型
                     fpti->obj = Const;//记录种类
 //                    getNextSymbolAndType();//读取常量名
-                    strcpy(fpti->name, symbol);//记录常量名
+                    fpti->name = symbol;//记录常量名
+//                    strcpy(fpti->name, symbol);//记录常量名
                     getNextSymbolAndType();//读取=号
                     //todo 容错
                     getNextSymbol();//读取常量值
@@ -797,15 +720,17 @@ void dealOverallVar(ReservedWord recordType) {
  */
 void dealInnerVar(TokenTableItem *tti, ReservedWord recordType) {
 //    printf("this is a inner variable declare\t\t\t%s\n", readIn);
+    tti->paramAddr = funcParamTablePointer;
     while(symbolType != semicolon) {
         FuncParamTableItem *fpti = &funcParamTable[funcParamTablePointer++];//获取下一个表项
         fpti->type = recordType;//类型记录为传进来的类型
         fpti->obj = Var;//记录种类
-        getNextSymbolAndType();
+        getNextSymbolAndType();//获得标识符
         if(symbolType == customObj) {
             if(!findFuncParamTable(tti, symbol)) {
                 tti->localVarAccount++;//将记录的函数局部变量值加一
-                strcpy(fpti->name, symbol);
+                fpti->name = symbol;//记录变量名
+//                strcpy(fpti->name, symbol);
                 //todo 重定义的容错处理
                 getNextSymbolAndType();
                 if (symbolType == comma) { //如果是逗号表示当前一个变量声明完毕，继续当前行的分析
@@ -824,10 +749,10 @@ void dealInnerVar(TokenTableItem *tti, ReservedWord recordType) {
                 }
                 else if (symbolType == lBracket) { //如果是左中括号表示是一个数组
                     fpti->isArray = true;
-                    getNextSymbolAndType();
+                    getNextSymbolAndType();//获取下标
                     if (isNumber(symbol)) { //如果数组下标是合法数字
                         fpti->arraySize = atoi(symbol); //记录数组的大小
-                        getNextSymbolAndType();
+                        getNextSymbolAndType();//]
                         if(recordType == Int)
                             emitQCode(qNewIntArray, fpti->name, itoa(fpti->arraySize), "");
                         else if(recordType == Char)
@@ -869,39 +794,105 @@ void dealInnerVar(TokenTableItem *tti, ReservedWord recordType) {
  * 处理赋值语句
  * @return
  */
-string dealAssign() {
+void dealAssign() {
 //    printf("this is a assign statement\t\t\t%s\n", readIn);
-//    while(symbolType != semicolon) {
-//        getNextSymbolAndType();
-//    }
-    getNextSymbolAndType();
-    int index = findTokenInTable(symbol);
-    if(index != 0) {
-        getNextSymbolAndType();
-        if(symbolType == assign) {
-            string result = dealExpression();
-//            emitQCode(qAssignInt, result, )
+    getNextSymbolAndType();//获得变量名
+    vector<string> findResult = findInAllTable(symbol);
+    string recordSymbol = symbol;
+    if(findResult.at(0) == "true") {
+        int index = std::atoi(findResult.at(2).c_str());
+        getNextSymbolAndType();//获取等号
+        if(findResult.at(1) == "overall") { //是全局变量
+            TokenTableItem tti = tokenTable[index];
+            if(tti.type == Int) {
+                emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
+            }
+            else if(tti.type == Char) {
+                emitQCode(qAssignChar, dealExpression(), recordSymbol, "");
+            }
+            else {
+                //todo 非法赋值类型的容错处理
+            }
         }
         else {
-            //todo 缺少赋值号的容错处理
+            FuncParamTableItem fpti = funcParamTable[index];
+            if(fpti.type == Int) {
+                emitQCode(qAssignInt, dealExpression(), symbol, "");
+            }
+            else if(fpti.type == Char) {
+                emitQCode(qAssignChar, dealExpression(), symbol, "");
+            }
+            else {
+                //todo 非法类型的容错处理
+            }
+        }
+    }
+}
+
+/**
+ * 处理函数调用的传参
+ * @param index 函数在符号表的位置
+ */
+void dealPassParam(int index) {
+    int pIndex = 0;
+    TokenTableItem tti = tokenTable[index];
+    int startIndex = tti.paramAddr;//在函数表的起始地址
+    int paramAccount = tti.paramAccount;//参数个数
+
+    getNextSymbolAndType();//(
+    if(symbolType == lParent) {
+//        getNextSymbolAndType();//获取下一个参数
+        if(paramAccount == 0) { //无参函数直接返回
+            getNextSymbolAndType();//)
+            return;
+        }
+        while(symbolType != rParent) {
+//            dealExpression();
+            emitQCode(qAssignChar, dealExpression(), "P" + itoa(pIndex++), "");
+//            getNextSymbolAndType();//获取下一个参数 , or )
+
+//            if(symbolType == rParent)
+//                break;
+//            FuncParamTableItem fpti = funcParamTable[startIndex + pIndex];
+//            if(fpti.type == Int) {
+//                emitQCode(qAssignInt, symbol, "P" + itoa(pIndex++), "");
+//            }
+//            else if(fpti.type == Char) {
+//                emitQCode(qAssignChar, symbol, "P" + itoa(pIndex++), "");
+//            }
+//            else {
+//                todo 错误的参数类型的容错处理
+//            }
+//            getNextSymbolAndType();//获取间隔符
         }
     }
     else {
-        //todo 使用未定义的变量的容错处理
+        //todo 函数调用缺少左括号的容错处理
     }
-
-    return "";
 }
 
 /**
  * 处理返回int的函数调用
  */
-string dealCallFunc(TokenTableItem tti) {
-    emitQCode(qJ, tti.name, "", "");
-    if(tti.type == Int) {
-        emitQCode(qNewIntVar, getNextTmpVar(), "returnValue", "");
+string dealCallFunc(int index) {
+    TokenTableItem tti = tokenTable[index];
+    dealPassParam(index);//处理传参
+    emitQCode(qJFunc, tti.name + ":", "", "");
+    string newTmpVar = getNextTmpVar();
+//    emitQCode(qJ, tti.name, "", "");
+    if(tti.returnType == Int) {
+        emitQCode(qNewIntVar, newTmpVar, "", "");
+        emitQCode(qAssignInt, "returnValue", newTmpVar, "");
     }
-    return "";
+    else if(tti.returnType == Char) {
+        emitQCode(qNewIntVar, newTmpVar, "", "");
+        emitQCode(qAssignChar, "returnValue", newTmpVar, "");
+    }
+    else {
+        //todo 使用无返回值函数的容错处理
+        return "error";
+    }
+    return newTmpVar;
 }
 
 /**
@@ -910,39 +901,86 @@ string dealCallFunc(TokenTableItem tti) {
  */
 string dealFactor() {
 //    printf("this is a factor\t\t\t%s\n", readIn);
-//    getNextSymbolAndType();
-    int index = findTokenInTable(symbol);
-    if(index != 0) { //如果是一个标识符
-        if(tokenTable[index].isArray) { //如果是数组型
-            getNextSymbolAndType();//[
-            getNextSymbolAndType();//
-            if(isNumber(symbol)) {
-                //todo 计算数组下标相应的值
+    //已经获得运算符的后一个token
+    vector<string> findResult = findInAllTable(symbol);
+    if(findResult.at(0) == "true") {
+        int index = std::atoi(findResult.at(2).c_str());
+        if(findResult.at(1) == "overall") { //是全局变量
+            TokenTableItem tti = tokenTable[index];
+            if(tti.isArray) { //如果是数组型
+                getNextSymbolAndType();//[
+                getNextSymbolAndType();//
+                string newTmpVar = getNextTmpVar();
+                if(isNumber(symbol)) {
+                    //todo 计算数组下标相应的值
+                    emitQCode(qGetArrayValue, tti.name, symbol, newTmpVar);
+                }
+                else {
+                    emitQCode(qGetArrayValue, tti.name, dealExpression(), newTmpVar);
+                }
+                getNextSymbolAndType();//获得]
+                return newTmpVar;
             }
-            else {
-                return dealExpression();
+            else if(tti.obj == Func) { //如果是一个函数
+//                string newTmpVar = getNextTmpVar();
+                if(tti.returnType == Int) { //return int
+                    return dealCallFunc(index);
+                }
+                else if(tti.returnType == Char) { //return char
+                    return dealCallFunc(index);
+                }
+                else { //return void
+                    //todo 使用了无返回值函数的容错处理
+                }
+            }
+            else { //非数组及函数的标识符
+                if(tti.type == Int) { //如果是int型变量返回int值
+                    if(tti.obj == Const)
+                        return itoa(tti.intValue); //如果是常量直接返回常量值
+                    return symbol;
+                }
+                else if(tti.type == Char){ //如果是char型返回char值
+                    if(tti.obj == Const)
+                        return ctoa(tti.charValue);
+                    return symbol;
+                }
+                else {
+                    printf("unexpected error in dealFactor\n");
+                }
             }
         }
-        else if(tokenTable[index].obj == Func) { //如果是一个函数
-            if(tokenTable[index].returnType == Int) { //return int
-                emitQCode(qNewIntVar, getNextTmpVar(), dealCallFunc(tokenTable[index]), "");//临时变量保存函数返回值
+        else { //如果是局部函数变量
+            FuncParamTableItem fpti = funcParamTable[index];
+            if(fpti.isArray) { //如果是数组型
+                getNextSymbolAndType();//[
+                getNextSymbolAndType();//
+                string newTmpVar = getNextTmpVar();
+                if(isNumber(symbol)) {
+                    //todo 计算数组下标相应的值
+                    emitQCode(qGetArrayValue, fpti.name, symbol, newTmpVar);
+                }
+                else {
+                    emitQCode(qGetArrayValue, fpti.name, dealExpression(), newTmpVar);
+                    return newTmpVar;
+//                    return dealExpression();
+                }
+                getNextSymbolAndType();//获得]
+                return newTmpVar;
             }
-            else if(tokenTable[index].returnType == Char) { //return char
-                emitQCode(qNewCharVar, getNextTmpVar(), dealCallFunc(tokenTable[index]), "");//临时变量保存函数返回值
-                return dealCallFunc(tokenTable[index]);
-            }
-            else { //return void
-                //todo 使用了无返回值函数的容错处理
-            }
-        }
-        else { //非数组及函数的标识符
-            if(tokenTable[index].type == Int) //如果是int型变量返回int值
-                return symbol;
-            else if(tokenTable[index].type == Char){ //如果是char型返回char值
-                return symbol;
-            }
-            else {
-                printf("unexpected error in dealFactor\n");
+            else { //非数组及函数的标识符
+                if(fpti.type == Int) { //如果是int型变量返回int值
+                    if(fpti.obj == Const)
+                        return itoa(fpti.intValue);
+                    return symbol;
+                }
+                else if(fpti.type == Char){ //如果是char型返回char值
+                    if(fpti.obj == Const)
+                        return ctoa(fpti.charValue);
+                    return symbol;
+                }
+                else {
+                    printf("unexpected error in dealFactor\n");
+                }
             }
         }
     }
@@ -952,13 +990,15 @@ string dealFactor() {
     else if(isChar(symbol)) { //如果是一个字符
         return symbol;
     }
-    else if(symbolType == lParent) { //如果是一个右括号
+    else if(symbolType == lParent) { //如果是一个左括号
         return dealExpression();
     }
     else {
         //todo 不合法的因子的容错处理
+        cout << "error in factor" << endl;
+        return "error";
     }
-    return "";
+    return "error";
 }
 
 /**
@@ -966,25 +1006,33 @@ string dealFactor() {
  */
 string dealTerm() {
 //    printf("this is a term\t\t\t%s\n", readIn);
+    //已经获得运算符的后一个字符
     string factor1 = dealFactor();//处理第一个因子
     while(true) {
-        getNextSymbolAndType();
+        getNextSymbolAndType();// + or - or ; or ] or )
         if(symbolType == mul || symbolType == Div) {
 //            string factor2 = dealFactor();//处理接下来的一个因子
-            string newTmp = getNextTmpVar();
+            string newTmp;
             if(symbolType == mul) {
                 newTmp = getNextTmpVar();
+                getNextSymbolAndType();
                 emitQCode(qMul, factor1, dealFactor(), newTmp);
                 factor1 = newTmp;
             }
             else {
                 newTmp = getNextTmpVar();
+                getNextSymbolAndType();
                 emitQCode(qDiv, factor1, dealFactor(), newTmp);
                 factor1 = newTmp;
             }
+//            getNextSymbolAndType();//获取下一个间隔符
+            //todo 优化返回条件
+            if(symbolType == semicolon)//如果检测到分号立即返回
+                return factor1;
         }
-        else
+        else {
             break;
+        }
     }
     return factor1;
 }
@@ -994,40 +1042,57 @@ string dealTerm() {
  */
 string dealExpression() {
 //    printf("this is a expression\t\t\t%s\n", readIn);
-    getNextSymbolAndType();
+    getNextSymbolAndType();//间隔符的后一个token
+    string newTmpVar;
     string term1;
     if(symbolType == Plus || symbolType == sub) {
-        getNextSymbolAndType();
-        term1 = dealTerm();
+        if(symbolType == sub) { //取反
+            getNextSymbolAndType();
+            newTmpVar = getNextTmpVar();
+            emitQCode(qNewIntVar, newTmpVar, "", "");
+            emitQCode(qReverse, dealTerm(), newTmpVar, "");
+            term1 = newTmpVar;
+        }
+        else {
+            getNextSymbolAndType();//跳过加号
+            term1 = dealTerm();
+        }
     }
     else {
         term1 = dealTerm();
     }
     while(true) {
 //        getNextSymbolAndType();
-        string newTmpVar = getNextTmpVar();
         if(symbolType == Plus || symbolType == sub) {
             if(symbolType == Plus) {
                 getNextSymbolAndType();
+                newTmpVar = getNextTmpVar();
+                emitQCode(qNewIntVar, newTmpVar, "", "");
                 emitQCode(qPlus, term1, dealTerm(), newTmpVar);
                 term1 = newTmpVar;
             }
             else {
                 getNextSymbolAndType();
+                newTmpVar = getNextTmpVar();
+                emitQCode(qNewIntVar, newTmpVar, "", "");
                 emitQCode(qSub, term1, dealTerm(), newTmpVar);
                 term1 = newTmpVar;
             }
         }
-        else if(symbolType == rParent || symbolType == semicolon) //读到分号或者右括号表示表达式结束
+        else if(symbolType == rParent || symbolType == semicolon || symbolType == comma) //读到分号或者右括号表示表达式结束
             break;
         else if(symbolType == big || symbolType == small || symbolType == bigAndEql
                 || symbolType == smallAndEql || symbolType == eql || symbolType == notEql) {
-            //todo 错误的运算符
             break;
         }
         else {
-            getTypeToString(symbol);
             printf("unexpected error in dealExpression\n");
+            printAllQCode();
+            cout << "****token*****" << endl;
+            printTokenTable();
+            cout << "****func******" << endl;
+            printFuncParamTable();
+            exit(0);
         }
     }
     return term1;
@@ -1039,24 +1104,25 @@ string dealExpression() {
  */
 void dealCondition(string label1) {
 //    printf("this is a condition\t\t\t%s\n", readIn);
-    string op1, op2;
+    string op1;
     op1 = dealExpression();//处理第一个表达式并获取结果
 //    getNextSymbolAndType();
     if(symbolType == big || symbolType == small || symbolType == bigAndEql
             || symbolType == smallAndEql || symbolType == eql || symbolType == notEql) {
-        op2 = dealExpression();//处理第二个表达式并获取结果
+//        string recordSymbol = symbol;//记录比较符
+//        op2 = dealExpression();//处理第二个表达式并获取结果
         if(symbolType == big)
-            emitQCode(qJle, op1, op2, label1);
+            emitQCode(qJle, op1, dealExpression(), label1);
         else if(symbolType == small)
-            emitQCode(qJge, op1, op2, label1);
+            emitQCode(qJge, op1, dealExpression(), label1);
         else if(symbolType == bigAndEql)
-            emitQCode(qJl, op1, op2, label1);
+            emitQCode(qJl, op1, dealExpression(), label1);
         else if(symbolType == smallAndEql)
-            emitQCode(qJg, op1, op2, label1);
+            emitQCode(qJg, op1, dealExpression(), label1);
         else if(symbolType == eql)
-            emitQCode(qJne, op1, op2, label1);
+            emitQCode(qJne, op1, dealExpression(), label1);
         else if(symbolType == notEql)
-            emitQCode(qJe, op1, op2, label1);
+            emitQCode(qJe, op1, dealExpression(), label1);
         else {
 
         }
@@ -1075,6 +1141,52 @@ void dealCondition(string label1) {
 void dealForStep() {
 //    printf("this is a for step\t\t\t%s\n", readIn);
     getNextSymbolAndType();//结果标识符
+    vector<string> findResult = findInAllTable(symbol);
+    string recordSymbol = symbol;
+    if(findResult.at(0) == "true") {
+        int index = std::atoi(findResult.at(2).c_str());
+        getNextSymbolAndType();//获取等号=
+        if(findResult.at(1) == "overall") { //如果是全局变量
+            TokenTableItem tti = tokenTable[index];
+            if(symbolType == assign) {
+                if(tti.type == Int) {
+                    emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
+                }
+                else if(tti.type == Char) {
+                    emitQCode(qAssignChar, dealExpression(), recordSymbol, "");
+                }
+                else {
+                    //todo 非法的类型
+                }
+            }
+            else {
+                //todo 缺少赋值号的容错处理
+            }
+
+        }
+        else { //局部变量
+            FuncParamTableItem fpti = funcParamTable[index];
+            if(symbolType == assign) {
+                if(fpti.type == Int) {
+                    emitQCode(qAssignInt, dealExpression(), symbol, "");
+                }
+                else if(fpti.type == Char) {
+                    emitQCode(qAssignChar, dealExpression(), symbol, "");
+                }
+                else {
+                    //todo 非法的类型
+                }
+            }
+            else {
+                //todo 缺少赋值号的容错处理
+            }
+        }
+    }
+    else {
+        //todo 为找到合法变量定义的容错处理
+    }
+
+
     if(tokenTable[findTokenInTable(symbol)].obj == Var) { //如果能找到并且是一个变量
         getNextSymbolAndType();//=号
         if(symbolType == assign) {
@@ -1128,6 +1240,8 @@ void dealFor() {
     getNextSymbolAndType(); //{
     if(symbolType == lBrace) {
         dealStatements();
+        emitQCode(qJ, label1, "", "");
+        emitQCode(qLabel, label2, "", "");
     }
     else if(symbolType == semicolon){ //如果是分号表示for循环有一个空循环体，则结束当前行处理
         return;
@@ -1157,8 +1271,10 @@ void dealDoWhile() {
     getNextSymbolAndType();
     if(symbolType == While) {
         getNextSymbolAndType();//(
-        if(symbolType == lParent)
+        if(symbolType == lParent) {
             dealCondition(label1);
+            getNextSymbolAndType();//获取分号;
+        }
         else {
             //todo while后缺少左括号的容错处理
         }
@@ -1210,39 +1326,109 @@ void dealStatement() {
     //已经获取首个token，不需要重新获取
 //    printf("this is a statement\t\t\t%s\n", readIn);
 
-    int index = findTokenInTable(symbol);
+//    int index = findTokenInTable(symbol);
+    vector<string> findResult = findInAllTable(symbol);
     string recordSymbol = symbol;
-    cout << "index: " << index << endl;
-    TokenTableItem tti = tokenTable[index];
-    if(index != 0) {
+    if(findResult.at(0) == "true") {
+        int index = std::atoi(findResult.at(2).c_str());
+        if(findResult.at(1) == "overall") { //全局变量
+            TokenTableItem tti = tokenTable[index];
+            if(tti.obj == Func) {
+                dealCallFunc(index);
+            }
+            else if(tti.isArray) {
+                //todo 数组的赋值语句
+                getNextSymbolAndType();//[
+                getNextSymbolAndType();//下标
+                string arrayIndex = symbol;
+                getNextSymbolAndType();//]
+                getNextSymbolAndType();
+                if(symbolType == assign) {
+                    if(tti.type == Int)
+                        emitQCode(qAssignIntArray, dealExpression(), arrayIndex, tti.name);
+                    else
+                        emitQCode(qAssignCharArray, dealExpression(), arrayIndex, tti.name);
+                }
+                else {
+                    //todo 错误的语句类型的容错处理
+                }
+            }
+            else {
+                getNextSymbolAndType();
+                if(symbolType == assign) {
+                    if(tti.type == Int)
+                        emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
+                    else
+                        emitQCode(qAssignChar, dealExpression(), recordSymbol,"");
+                }
+                else {
+                    //todo 错误的语句类型的容错处理
+                }
+            }
+        }
+        else { //局部变量
+            FuncParamTableItem fpti = funcParamTable[index];
+            if(fpti.obj == Func) {
+                dealCallFunc(index);
+            }
+            else if(fpti.isArray) {
+                //todo 数组的赋值语句
+                getNextSymbolAndType();//[
+                getNextSymbolAndType();//下标
+                string arrayIndex = symbol;
+                getNextSymbolAndType();//]
+                getNextSymbolAndType();
+                if(symbolType == assign) {
+                    if(fpti.type == Int)
+                        emitQCode(qAssignIntArray, dealExpression(), arrayIndex, fpti.name);
+                    else
+                        emitQCode(qAssignCharArray, dealExpression(), arrayIndex, fpti.name);
+                }
+                else {
+                    //todo 错误的语句类型的容错处理
+                }
+            }
+            else {
+                getNextSymbolAndType();
+                if(symbolType == assign) {
+                    if(fpti.type == Int)
+                        emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
+                    else
+                        emitQCode(qAssignChar, dealExpression(), recordSymbol,"");
+                }
+                else {
+                    //todo 错误的语句类型的容错处理
+                }
+            }
+        }
+    }
+    else { //使用了其他的关键字
         if(symbolType == Printf) {
             //todo 输出语句
         }
         else if(symbolType == Scanf) {
             //todo 输入语句
         }
-        else if(tti.obj == Func) {
-            dealCallFunc(tokenTable[index]);
-        }
-        else if(tti.isArray) {
-            //todo 数组的赋值语句
-        }
-        else {
-            getNextSymbolAndType();
-            if(symbolType == assign) {
-                if(tti.type == Int)
-                    emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
-                else
-                    emitQCode(qAssignChar, dealExpression(), recordSymbol,"");
+        else if(symbolType == Return) {
+            getNextSymbolAndType();//(
+            if(symbolType == lParent) {
+//                getNextSymbolAndType();//获取标识符
+                if(symbolType == rParent) { //如果是空表示无返回值
+                    emitQCode(qJ, "end_" + currentDealFunc + ":", "", "");//跳转到函数结尾
+                }
+                else {
+                    //todo 将返回值存储
+                    emitQCode(qAssignInt, dealExpression(), "returnValue", "");
+                    emitQCode(qJ, "end_" + currentDealFunc + ":", "", "");//跳转到函数结尾
+                }
             }
             else {
-                //todo 错误的语句类型的容错处理
-                cout << "in" << endl;
+                //todo 缺少左括号的容错处理
             }
         }
-    }
-    else {
-        //todo 使用未定义符号的容错处理
+        else {
+            //todo 无效的类型的容错处理
+        }
     }
 
 }
@@ -1256,9 +1442,11 @@ void dealStatements() {
 //        getNextSymbolAndType();
         if (symbolType == If) { //进入if...else...循环
             dealIf();
+            getNextSymbolAndType();
         }
         else if (symbolType == For) { //进入for循环
             dealFor();
+            getNextSymbolAndType();
         }
         else if (symbolType == Do) { //进入do...while...循环
             dealDoWhile();
@@ -1274,7 +1462,7 @@ void dealStatements() {
             dealStatements();
         }
         else if(symbolType == semicolon) {
-            break;
+            getNextSymbolAndType();//获取下一行的第一个token
         }
         else {
             dealStatement();
@@ -1288,6 +1476,8 @@ void dealStatements() {
  */
 void dealParamlist(TokenTableItem *tti) {
 //    printf("this is a paramlist\t\t\t%s\n", readIn);
+    //已获取左括号
+    int pIndex = 0;
     getNextSymbolAndType();
     if(symbolType == rParent) { //如果是空表示没有参数
         tti->paramAccount = 0;
@@ -1302,7 +1492,13 @@ void dealParamlist(TokenTableItem *tti) {
                 fpt->type = symbolType;
                 getNextSymbolAndType();
                 if (symbolType == customObj) {
-                    strcpy(fpt->name, symbol);//记录参数名
+                    fpt->name = symbol;//记录参数名
+                    if(symbolType == Int) {
+                        emitQCode(qAssignInt, "P" + itoa(pIndex++), fpt->name, "");
+                    }
+                    else {
+                        emitQCode(qAssignChar, "P" + itoa(pIndex++), fpt->name, "");
+                    }
                     getNextSymbolAndType();
                     if (symbolType == comma) {
                         getNextSymbolAndType();
@@ -1377,6 +1573,7 @@ void grammaticalAnalysis() {
                 getNextSymbolAndType();//获取标识符类型
                 if(symbolType == lParent) { //如果是(表示是一个函数
                     tti->obj = Func;
+                    tti->returnType = recordType;//记录函数返回类型
                     dealFunc(tti);
                 }
                 else if(symbolType == lBracket) { //如果是[表明是一个声明数组变量语句
@@ -1435,12 +1632,11 @@ void grammaticalAnalysis() {
             }
             else if(symbolType == Void) {
                 TokenTableItem *tti = &tokenTable[tokenTablePointer++];
-                tti->type = Void;
+                tti->returnType = Void;
                 tti->obj = Func;
                 getNextSymbolAndType();
                 if(symbolType == customObj) {
                     tti->name = symbol;
-//                    strcpy(tti->name, symbol);
                     getNextSymbolAndType();
                     if(symbolType == lParent) { //如果是左括号则开始处理函数参数表
                         dealFunc(tti);
@@ -1468,12 +1664,12 @@ void grammaticalAnalysis() {
  */
 int main() {
     init();
-//    in = fopen("/Users/billy/Documents/Github/C/Compiler/testCode.txt", "r");
-    in = fopen("/Users/billy/Documents/Github/C/Compiler/testCode.txt", "r");
+//    in = fopen("/Users/billy/Documents/Github/C/Compiler/14061131_test.txt", "r");
+    in = fopen("/Users/billy/Documents/Github/Compiler/testCode.txt", "r");
     grammaticalAnalysis();
     printAllQCode();
     printTokenTable();
-//    printFuncParamTable();
+    printFuncParamTable();
 //    printf("***********start***********\n");
 //    printAllSymbol();
 //    printf("************end************\n");

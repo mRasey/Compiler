@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/billy/Documents/Github/Compiler/Compiler.cpp
+string.h
+-
+stdbool.h
+-
+stdio.h
+-
+cstdlib
+-
+iostream
+-
+sstream
+-
+iomanip
+-
+vector
+-
+Compiler.h
+/Users/billy/Documents/Github/Compiler/Compiler.h
+
+/Users/billy/Documents/Github/Compiler/Compiler.h
+string
+-
+
