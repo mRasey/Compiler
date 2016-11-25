@@ -2,62 +2,244 @@
 // Created by 王震 on 2016/11/7.
 //
 
-#include <string.h>
-#include <stdbool.h>
-#include<stdio.h>
-#include <cstdlib>
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <vector>
-#include "Compiler.h"
 
-void printTokenTable() ;
-void printFuncParamTable() ;
-bool isinterval(char c) ;
-bool isKeyword(char* s) ;
-bool isNumber(char* s) ;
-bool isChar(char* s) ;
-string itoa(int i) ;
-string ctoa(char a) ;
-string getNextLabel() ;
-string getNextTmpVar() ;
-void printAllQCode() ;
-string getFuncLabel(string funcName) ;
-char getNextChar() ;
-void pushBackChar() ;
-void clearSymbol() ;
-void symbolAppend(char c) ;
-char* getNextSymbol() ;
-void getNextSymbolAndType() ;
-char* getTypeToString(char* symbol) ;
-void output(char* s) ;
-void printAllSymbol() ;
-void jumpToNextLine() ;
-int findTokenInTable(string symbol) ;
-bool findFuncParamTable(TokenTableItem* tti, char* symbol) ;
-vector<string> findInAllTable(string symbol) ;
-void dealOverallConst() ;
-void dealInnerConst(TokenTableItem *ptr);
-void dealOverallVar(ReservedWord recordType) ;
-void dealInnerVar(TokenTableItem *tti, ReservedWord param);
-void dealAssign() ;
-void dealPassParam(int index) ;
-string dealCallFunc(int index) ;
-string dealFactor() ;
-string dealTerm() ;
-string dealExpression() ;
-void dealCondition(string label);
-void dealForStep() ;
-void dealFor() ;
-void dealDoWhile() ;
-void dealIf() ;
-void dealStatement() ;
-void dealStatements() ;
-void dealParamlist(TokenTableItem *tti) ;
-void dealFunc(TokenTableItem *tti) ;
-void grammaticalAnalysis() ;
-void emitQCode(QuadCodeInstr quadCodeInstr, char operand1[], char operand2[], char result[]) ;
+#include "Analysis.h"
+
+Interval intervals[100];//间隔符表
+Keyword keywords[100];//关键字表
+TokenTableItem tokenTable[1024];//符号表
+int tokenTablePointer = 1;//符号表指针，从1开始，0表示未找到
+CodeTableItem codeTable[1024];//代码表
+int codeTablePointer;//代码表指针
+QuadCodeTableItem quadCodeTable[1024];//四元式表
+int quadCodeTablePointer;//四元式表指针
+FuncParamTableItem funcParamTable[1024];//函数表
+int funcParamTablePointer;//函数表指针
+ReservedWord reservedWord;//当前处理的保留字
+FILE* in;
+char readIn[1024];
+int lineNowPos = 0;
+int lineLength;
+char symbol[1024];
+ReservedWord symbolType;
+char* symbolTypeToString;
+int symPos = 0;
+int intervalsLength;
+int keywordsLength;
+QuadCodeTableItem qCodeInstrs[1024];//四元式表
+int qCodePointer = 0;//四元式指针
+int labelPointer = 0;//标签指针
+int tmpVarPointer = 0;//临时变量指针
+string currentDealFunc = "";//当前处理函数
+
+/**
+ * 初始化间隔符
+ */
+void init() {
+    intervals[0].symbol = '+';
+    intervals[1].symbol = '-';
+    intervals[2].symbol = '*';
+    intervals[3].symbol = '/';
+    intervals[4].symbol = '>';
+    intervals[5].symbol = '<';
+    intervals[6].symbol = '=';
+    intervals[7].symbol = '{';
+    intervals[8].symbol = '}';
+    intervals[9].symbol = '[';
+    intervals[10].symbol = ']';
+    intervals[11].symbol = '(';
+    intervals[12].symbol = ')';
+    intervals[13].symbol = '\'';
+    intervals[14].symbol = '\"';
+    intervals[15].symbol = ':';
+    intervals[16].symbol = ';';
+    intervals[17].symbol = ',';
+    intervals[18].symbol = ' ';
+    intervals[19].symbol = '\n';
+    intervals[20].symbol = '!';
+    intervalsLength = 21;
+
+    keywords[0].symbol = "int";
+    keywords[0].reservedWord = Int;
+    keywords[0].rwToString = "Int";
+    keywords[1].symbol = "char";
+    keywords[1].reservedWord = Char;
+    keywords[1].rwToString = "Char";
+    keywords[2].symbol = "for";
+    keywords[2].reservedWord = For;
+    keywords[2].rwToString = "For";
+    keywords[3].symbol = "while";
+    keywords[3].reservedWord = While;
+    keywords[3].rwToString = "While";
+    keywords[4].symbol = "do";
+    keywords[4].reservedWord = Do;
+    keywords[4].rwToString = "Do";
+    keywords[5].symbol = "if";
+    keywords[5].reservedWord = If;
+    keywords[5].rwToString = "If";
+    keywords[6].symbol = "else";
+    keywords[6].reservedWord = Else;
+    keywords[6].rwToString = "Else";
+    keywords[7].symbol = "printf";
+    keywords[7].reservedWord = Printf;
+    keywords[7].rwToString = "Printf";
+    keywords[8].symbol = "scanf";
+    keywords[8].reservedWord = Scanf;
+    keywords[8].rwToString = "Scanf";
+    keywords[9].symbol = "const";
+    keywords[9].reservedWord = Const;
+    keywords[9].rwToString = "Const";
+    keywords[10].symbol = ">";
+    keywords[10].reservedWord = big;
+    keywords[10].rwToString = "Big";
+    keywords[11].symbol = "<";
+    keywords[11].reservedWord = small;
+    keywords[11].rwToString = "small";
+    keywords[12].symbol = ">=";
+    keywords[12].reservedWord = bigAndEql;
+    keywords[12].rwToString = "bigAndEql";
+    keywords[13].symbol = "<=";
+    keywords[13].reservedWord = smallAndEql;
+    keywords[13].rwToString = "smallAndEql";
+    keywords[14].symbol = "==";
+    keywords[14].reservedWord = eql;
+    keywords[14].rwToString = "eql";
+    keywords[15].symbol = "=";
+    keywords[15].reservedWord = assign;
+    keywords[15].rwToString = "assign";
+    keywords[16].symbol = "!=";
+    keywords[16].reservedWord = notEql;
+    keywords[16].rwToString = "notEql";
+    keywords[17].symbol = "+";
+    keywords[17].reservedWord = Plus;
+    keywords[17].rwToString = "plus";
+    keywords[18].symbol = "-";
+    keywords[18].reservedWord = sub;
+    keywords[18].rwToString = "sub";
+    keywords[19].symbol = "*";
+    keywords[19].reservedWord = mul;
+    keywords[19].rwToString = "mul";
+    keywords[20].symbol = "/";
+    keywords[20].reservedWord = Div;
+    keywords[20].rwToString = "Div";
+    keywords[21].symbol = "{";
+    keywords[21].reservedWord = lBrace;
+    keywords[21].rwToString = "lBrace";
+    keywords[22].symbol = "}";
+    keywords[22].reservedWord = rBrace;
+    keywords[22].rwToString = "rBrace";
+    keywords[23].symbol = "[";
+    keywords[23].reservedWord = lBracket;
+    keywords[23].rwToString = "lBracket";
+    keywords[24].symbol = "]";
+    keywords[24].reservedWord = rBracket;
+    keywords[24].rwToString = "rBracket";
+    keywords[25].symbol = "(";
+    keywords[25].reservedWord = lParent;
+    keywords[25].rwToString = "lParent";
+    keywords[26].symbol = ")";
+    keywords[26].reservedWord = rParent;
+    keywords[26].rwToString = "rParent";
+    keywords[27].symbol = ":";
+    keywords[27].reservedWord = colon;
+    keywords[27].rwToString = "colon";
+    keywords[28].symbol = ",";
+    keywords[28].reservedWord = comma;
+    keywords[28].rwToString = "comma";
+    keywords[29].symbol = ";";
+    keywords[29].reservedWord = semicolon;
+    keywords[29].rwToString = "semicolon";
+
+    keywords[30].symbol = "void";
+    keywords[30].reservedWord = Void;
+    keywords[30].rwToString = "Void";
+
+    keywords[31].symbol = "return";
+    keywords[31].reservedWord = Return;
+    keywords[31].rwToString = "return";
+    keywordsLength = 32;
+}
+
+/**
+ * 四元式指令类型转字符串
+ * @param instr
+ * @return
+ */
+string getStrQCode(QuadCodeInstr instr) {
+    if(instr == qNewIntCons)
+        return "qNewIntCons";
+    if(instr == qNewCharCons)
+        return "qNewCharCons";
+    if(instr == qNewIntVar)
+        return "qNewIntVar";
+    if(instr == qNewCharVar)
+        return "qNewCharVar";
+    if(instr == qNewIntArray)
+        return "qNewIntArray";
+    if(instr == qNewCharArray)
+        return "qNewCharArray";
+    if(instr == qFuncLabel)
+        return "qFuncLabel";
+    if(instr == qFuncEndLabel)
+        return "qFuncEndLabel";
+    if(instr == qLabel)
+        return "qLabel";
+    if(instr == qCallFunc)
+        return "qCallFunc";
+    if(instr == qPlus)
+        return "qPlus";
+    if(instr == qSub)
+        return "qSub";
+    if(instr == qMul)
+        return "qMul";
+    if(instr == qDiv)
+        return "qDiv";
+    if(instr == qJg)
+        return "qJg";
+    if(instr == qJl)
+        return "qJl";
+    if(instr == qJe)
+        return "qJe";
+    if(instr == qJne)
+        return "qJne";
+    if(instr == qJge)
+        return "qJge";
+    if(instr == qJle)
+        return "qJle";
+    if(instr == qJ)
+        return "qJ";
+    if(instr == qJFunc)
+        return "qJFunc";
+    if(instr == qGetArrayValue)
+        return "qGetArrayValue";
+    if(instr == qGetArrayIntValue)
+        return "qGetArrayIntValue";
+    if(instr == qGetArrayCharValue)
+        return "qGetArrayCharValue";
+    if(instr == qAssignInt)
+        return "qAssignInt";
+    if(instr == qAssignChar)
+        return "qAssignChar";
+    if(instr == qAssignIntArray)
+        return "qAssignIntArray";
+    if(instr == qAssignCharArray)
+        return "qAssignCharArray";
+    if(instr == qReverse)
+        return "qReverse";
+    if(instr == qPassParam)
+        return "qPassParam";
+    if(instr == qReturn)
+        return "qReturn";
+    if(instr == qScanf)
+        return "qScanf";
+    if(instr == qPrintf)
+        return "qPrintf";
+    if(instr == qSaveAddr)
+        return "qSaveAddr";
+    if(instr == qLoadAddr)
+        return "qLoadAddr";
+    return "errType";
+}
 
 /**
  * 在函数参数表里寻找指定变量
@@ -913,13 +1095,20 @@ string dealFactor() {
                 string newTmpVar = getNextTmpVar();
                 if(isNumber(symbol)) {
                     //todo 计算数组下标相应的值
-                    emitQCode(qGetArrayValue, tti.name, symbol, newTmpVar);
+                    if(tti.type == Int)
+                        emitQCode(qGetArrayIntValue, tti.name, symbol, newTmpVar);
+                    else
+                        emitQCode(qGetArrayCharValue, tti.name, symbol, newTmpVar);
+                    getNextSymbolAndType();//获得]
+                    return newTmpVar;
                 }
                 else {
-                    emitQCode(qGetArrayValue, tti.name, dealExpression(), newTmpVar);
+                    if(tti.type == Int)
+                        emitQCode(qGetArrayIntValue, tti.name, dealExpression(), newTmpVar);
+                    else
+                        emitQCode(qGetArrayCharValue, tti.name, dealExpression(), newTmpVar);
+                    return newTmpVar;
                 }
-                getNextSymbolAndType();//获得]
-                return newTmpVar;
             }
             else if(tti.obj == Func) { //如果是一个函数
 //                string newTmpVar = getNextTmpVar();
@@ -957,15 +1146,21 @@ string dealFactor() {
                 string newTmpVar = getNextTmpVar();
                 if(isNumber(symbol)) {
                     //todo 计算数组下标相应的值
-                    emitQCode(qGetArrayValue, fpti.name, symbol, newTmpVar);
+                    if(fpti.type == Int)
+                        emitQCode(qGetArrayIntValue, fpti.name, symbol, newTmpVar);
+                    else
+                        emitQCode(qGetArrayCharValue, fpti.name, symbol, newTmpVar);
+                    getNextSymbolAndType();//获得]
+                    return newTmpVar;
                 }
                 else {
-                    emitQCode(qGetArrayValue, fpti.name, dealExpression(), newTmpVar);
+                    if(fpti.type == Int)
+                        emitQCode(qGetArrayIntValue, fpti.name, dealExpression(), newTmpVar);
+                    else
+                        emitQCode(qGetArrayCharValue, fpti.name, dealExpression(), newTmpVar);
                     return newTmpVar;
 //                    return dealExpression();
                 }
-                getNextSymbolAndType();//获得]
-                return newTmpVar;
             }
             else { //非数组及函数的标识符
                 if(fpti.type == Int) { //如果是int型变量返回int值
@@ -1016,12 +1211,14 @@ string dealTerm() {
             if(symbolType == mul) {
                 newTmp = getNextTmpVar();
                 getNextSymbolAndType();
+                emitQCode(qNewIntVar, newTmp, "", "");
                 emitQCode(qMul, factor1, dealFactor(), newTmp);
                 factor1 = newTmp;
             }
             else {
                 newTmp = getNextTmpVar();
                 getNextSymbolAndType();
+                emitQCode(qNewIntVar, newTmp, "", "");
                 emitQCode(qDiv, factor1, dealFactor(), newTmp);
                 factor1 = newTmp;
             }
@@ -1045,7 +1242,12 @@ string dealExpression() {
     getNextSymbolAndType();//间隔符的后一个token
     string newTmpVar;
     string term1;
-    if(symbolType == Plus || symbolType == sub) {
+    if(symbolType == aString) {
+        string result = symbol;
+        getNextSymbolAndType();//, or )
+        return result;
+    }
+    else if(symbolType == Plus || symbolType == sub) {
         if(symbolType == sub) { //取反
             getNextSymbolAndType();
             newTmpVar = getNextTmpVar();
@@ -1079,10 +1281,17 @@ string dealExpression() {
                 term1 = newTmpVar;
             }
         }
-        else if(symbolType == rParent || symbolType == semicolon || symbolType == comma) //读到分号或者右括号表示表达式结束
+        else if(symbolType == rParent
+                || symbolType == semicolon
+                || symbolType == comma
+                || symbolType == rBracket) //读到分号或者右括号表示表达式结束
             break;
-        else if(symbolType == big || symbolType == small || symbolType == bigAndEql
-                || symbolType == smallAndEql || symbolType == eql || symbolType == notEql) {
+        else if(symbolType == big
+                || symbolType == small
+                || symbolType == bigAndEql
+                || symbolType == smallAndEql
+                || symbolType == eql
+                || symbolType == notEql) {
             break;
         }
         else {
@@ -1339,18 +1548,20 @@ void dealStatement() {
             else if(tti.isArray) {
                 //todo 数组的赋值语句
                 getNextSymbolAndType();//[
-                getNextSymbolAndType();//下标
-                string arrayIndex = symbol;
-                getNextSymbolAndType();//]
-                getNextSymbolAndType();
-                if(symbolType == assign) {
-                    if(tti.type == Int)
-                        emitQCode(qAssignIntArray, dealExpression(), arrayIndex, tti.name);
-                    else
-                        emitQCode(qAssignCharArray, dealExpression(), arrayIndex, tti.name);
+                if(symbolType == lBracket) {
+                    string arrayIndex = dealExpression();
+                    getNextSymbolAndType();//=
+                    if (symbolType == assign) {
+                        if (tti.type == Int)
+                            emitQCode(qAssignIntArray, dealExpression(), arrayIndex, tti.name);
+                        else
+                            emitQCode(qAssignCharArray, dealExpression(), arrayIndex, tti.name);
+                    } else {
+                        //todo 错误的语句类型的容错处理
+                    }
                 }
                 else {
-                    //todo 错误的语句类型的容错处理
+                    //todo 数组缺少左括号的容错处理
                 }
             }
             else {
@@ -1374,18 +1585,20 @@ void dealStatement() {
             else if(fpti.isArray) {
                 //todo 数组的赋值语句
                 getNextSymbolAndType();//[
-                getNextSymbolAndType();//下标
-                string arrayIndex = symbol;
-                getNextSymbolAndType();//]
-                getNextSymbolAndType();
-                if(symbolType == assign) {
-                    if(fpti.type == Int)
-                        emitQCode(qAssignIntArray, dealExpression(), arrayIndex, fpti.name);
-                    else
-                        emitQCode(qAssignCharArray, dealExpression(), arrayIndex, fpti.name);
+                if(symbolType == lBracket) {
+                    string arrayIndex = dealExpression();
+                    getNextSymbolAndType();//=
+                    if (symbolType == assign) {
+                        if (fpti.type == Int)
+                            emitQCode(qAssignIntArray, dealExpression(), arrayIndex, fpti.name);
+                        else
+                            emitQCode(qAssignCharArray, dealExpression(), arrayIndex, fpti.name);
+                    } else {
+                        //todo 非赋值语句类型的容错处理
+                    }
                 }
                 else {
-                    //todo 错误的语句类型的容错处理
+                    //todo 数组缺少左括号的容错处理
                 }
             }
             else {
@@ -1405,9 +1618,30 @@ void dealStatement() {
     else { //使用了其他的关键字
         if(symbolType == Printf) {
             //todo 输出语句
+            getNextSymbolAndType();//(
+            if(symbolType == lParent) {
+                do {
+                    emitQCode(qPrintf, dealExpression(), "", "");
+                } while(symbolType == comma);
+            }
+            else {
+                //todo 输出语句缺少括号的容错处理
+            }
         }
         else if(symbolType == Scanf) {
             //todo 输入语句
+            getNextSymbolAndType();//(
+             do {
+                 getNextSymbolAndType();//标识符
+                 if(symbolType == customObj) {
+                     emitQCode(qScanf, symbol, "", "");
+                     getNextSymbolAndType();//, or )
+                 }
+                 else {
+                     //todo 输入到非标识符的容错处理
+                 }
+            } while(symbolType == comma);
+            getNextSymbolAndType();//;
         }
         else if(symbolType == Return) {
             getNextSymbolAndType();//(
@@ -1543,7 +1777,6 @@ void dealFunc(TokenTableItem *tti) {
             dealInnerVar(tti, symbolType);
             getNextSymbolAndType();
         }
-        cout << "symbol: " << symbol << endl;
         dealStatements();
     }
     else {
@@ -1551,7 +1784,6 @@ void dealFunc(TokenTableItem *tti) {
     }
     emitQCode(qFuncEndLabel, getFuncLabel("end_" + tti->name), "", "");
 }
-
 
 /**
  * 语法分析程序
@@ -1656,22 +1888,4 @@ void grammaticalAnalysis() {
         else
             return;
     }
-}
-
-/**
- * 主函数
- * @return 0
- */
-int main() {
-    init();
-//    in = fopen("/Users/billy/Documents/Github/C/Compiler/14061131_test.txt", "r");
-    in = fopen("/Users/billy/Documents/Github/Compiler/testCode.txt", "r");
-    grammaticalAnalysis();
-    printAllQCode();
-    printTokenTable();
-    printFuncParamTable();
-//    printf("***********start***********\n");
-//    printAllSymbol();
-//    printf("************end************\n");
-    return 0;
 }

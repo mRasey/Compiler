@@ -82,10 +82,19 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/Users/billy/Documents/Github/Compiler/Compiler.cpp">
+		<Unit filename="/Users/billy/Documents/Github/Compiler/Analysis.cpp">
 			<Option target="Compiler"/>
 		</Unit>
-		<Unit filename="/Users/billy/Documents/Github/Compiler/Compiler.h">
+		<Unit filename="/Users/billy/Documents/Github/Compiler/Analysis.h">
+			<Option target="Compiler"/>
+		</Unit>
+		<Unit filename="/Users/billy/Documents/Github/Compiler/Generate.cpp">
+			<Option target="Compiler"/>
+		</Unit>
+		<Unit filename="/Users/billy/Documents/Github/Compiler/Generate.h">
+			<Option target="Compiler"/>
+		</Unit>
+		<Unit filename="/Users/billy/Documents/Github/Compiler/main.cpp">
 			<Option target="Compiler"/>
 		</Unit>
 		<Unit filename="/Users/billy/Documents/Github/Compiler/CMakeLists.txt">

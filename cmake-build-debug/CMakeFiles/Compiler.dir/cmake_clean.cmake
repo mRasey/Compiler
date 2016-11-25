@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/Compiler.dir/Compiler.cpp.o"
+  "CMakeFiles/Compiler.dir/main.cpp.o"
+  "CMakeFiles/Compiler.dir/Analysis.cpp.o"
+  "CMakeFiles/Compiler.dir/Generate.cpp.o"
   "Compiler.pdb"
   "Compiler"
 )

@@ -57,41 +57,93 @@ include CMakeFiles/Compiler.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/Compiler.dir/flags.make
 
-CMakeFiles/Compiler.dir/Compiler.cpp.o: CMakeFiles/Compiler.dir/flags.make
-CMakeFiles/Compiler.dir/Compiler.cpp.o: ../Compiler.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/billy/Documents/Github/Compiler/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/Compiler.dir/Compiler.cpp.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Compiler.dir/Compiler.cpp.o -c /Users/billy/Documents/Github/Compiler/Compiler.cpp
+CMakeFiles/Compiler.dir/main.cpp.o: CMakeFiles/Compiler.dir/flags.make
+CMakeFiles/Compiler.dir/main.cpp.o: ../main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/billy/Documents/Github/Compiler/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/Compiler.dir/main.cpp.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Compiler.dir/main.cpp.o -c /Users/billy/Documents/Github/Compiler/main.cpp
 
-CMakeFiles/Compiler.dir/Compiler.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Compiler.dir/Compiler.cpp.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/billy/Documents/Github/Compiler/Compiler.cpp > CMakeFiles/Compiler.dir/Compiler.cpp.i
+CMakeFiles/Compiler.dir/main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Compiler.dir/main.cpp.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/billy/Documents/Github/Compiler/main.cpp > CMakeFiles/Compiler.dir/main.cpp.i
 
-CMakeFiles/Compiler.dir/Compiler.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compiler.dir/Compiler.cpp.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/billy/Documents/Github/Compiler/Compiler.cpp -o CMakeFiles/Compiler.dir/Compiler.cpp.s
+CMakeFiles/Compiler.dir/main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compiler.dir/main.cpp.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/billy/Documents/Github/Compiler/main.cpp -o CMakeFiles/Compiler.dir/main.cpp.s
 
-CMakeFiles/Compiler.dir/Compiler.cpp.o.requires:
+CMakeFiles/Compiler.dir/main.cpp.o.requires:
 
-.PHONY : CMakeFiles/Compiler.dir/Compiler.cpp.o.requires
+.PHONY : CMakeFiles/Compiler.dir/main.cpp.o.requires
 
-CMakeFiles/Compiler.dir/Compiler.cpp.o.provides: CMakeFiles/Compiler.dir/Compiler.cpp.o.requires
-	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Compiler.cpp.o.provides.build
-.PHONY : CMakeFiles/Compiler.dir/Compiler.cpp.o.provides
+CMakeFiles/Compiler.dir/main.cpp.o.provides: CMakeFiles/Compiler.dir/main.cpp.o.requires
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/main.cpp.o.provides.build
+.PHONY : CMakeFiles/Compiler.dir/main.cpp.o.provides
 
-CMakeFiles/Compiler.dir/Compiler.cpp.o.provides.build: CMakeFiles/Compiler.dir/Compiler.cpp.o
+CMakeFiles/Compiler.dir/main.cpp.o.provides.build: CMakeFiles/Compiler.dir/main.cpp.o
+
+
+CMakeFiles/Compiler.dir/Analysis.cpp.o: CMakeFiles/Compiler.dir/flags.make
+CMakeFiles/Compiler.dir/Analysis.cpp.o: ../Analysis.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/billy/Documents/Github/Compiler/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/Compiler.dir/Analysis.cpp.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Compiler.dir/Analysis.cpp.o -c /Users/billy/Documents/Github/Compiler/Analysis.cpp
+
+CMakeFiles/Compiler.dir/Analysis.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Compiler.dir/Analysis.cpp.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/billy/Documents/Github/Compiler/Analysis.cpp > CMakeFiles/Compiler.dir/Analysis.cpp.i
+
+CMakeFiles/Compiler.dir/Analysis.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compiler.dir/Analysis.cpp.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/billy/Documents/Github/Compiler/Analysis.cpp -o CMakeFiles/Compiler.dir/Analysis.cpp.s
+
+CMakeFiles/Compiler.dir/Analysis.cpp.o.requires:
+
+.PHONY : CMakeFiles/Compiler.dir/Analysis.cpp.o.requires
+
+CMakeFiles/Compiler.dir/Analysis.cpp.o.provides: CMakeFiles/Compiler.dir/Analysis.cpp.o.requires
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Analysis.cpp.o.provides.build
+.PHONY : CMakeFiles/Compiler.dir/Analysis.cpp.o.provides
+
+CMakeFiles/Compiler.dir/Analysis.cpp.o.provides.build: CMakeFiles/Compiler.dir/Analysis.cpp.o
+
+
+CMakeFiles/Compiler.dir/Generate.cpp.o: CMakeFiles/Compiler.dir/flags.make
+CMakeFiles/Compiler.dir/Generate.cpp.o: ../Generate.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/billy/Documents/Github/Compiler/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/Compiler.dir/Generate.cpp.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Compiler.dir/Generate.cpp.o -c /Users/billy/Documents/Github/Compiler/Generate.cpp
+
+CMakeFiles/Compiler.dir/Generate.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Compiler.dir/Generate.cpp.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/billy/Documents/Github/Compiler/Generate.cpp > CMakeFiles/Compiler.dir/Generate.cpp.i
+
+CMakeFiles/Compiler.dir/Generate.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compiler.dir/Generate.cpp.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/billy/Documents/Github/Compiler/Generate.cpp -o CMakeFiles/Compiler.dir/Generate.cpp.s
+
+CMakeFiles/Compiler.dir/Generate.cpp.o.requires:
+
+.PHONY : CMakeFiles/Compiler.dir/Generate.cpp.o.requires
+
+CMakeFiles/Compiler.dir/Generate.cpp.o.provides: CMakeFiles/Compiler.dir/Generate.cpp.o.requires
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Generate.cpp.o.provides.build
+.PHONY : CMakeFiles/Compiler.dir/Generate.cpp.o.provides
+
+CMakeFiles/Compiler.dir/Generate.cpp.o.provides.build: CMakeFiles/Compiler.dir/Generate.cpp.o
 
 
 # Object files for target Compiler
 Compiler_OBJECTS = \
-"CMakeFiles/Compiler.dir/Compiler.cpp.o"
+"CMakeFiles/Compiler.dir/main.cpp.o" \
+"CMakeFiles/Compiler.dir/Analysis.cpp.o" \
+"CMakeFiles/Compiler.dir/Generate.cpp.o"
 
 # External object files for target Compiler
 Compiler_EXTERNAL_OBJECTS =
 
-Compiler: CMakeFiles/Compiler.dir/Compiler.cpp.o
+Compiler: CMakeFiles/Compiler.dir/main.cpp.o
+Compiler: CMakeFiles/Compiler.dir/Analysis.cpp.o
+Compiler: CMakeFiles/Compiler.dir/Generate.cpp.o
 Compiler: CMakeFiles/Compiler.dir/build.make
 Compiler: CMakeFiles/Compiler.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/billy/Documents/Github/Compiler/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable Compiler"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/billy/Documents/Github/Compiler/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable Compiler"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Compiler.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -99,7 +151,9 @@ CMakeFiles/Compiler.dir/build: Compiler
 
 .PHONY : CMakeFiles/Compiler.dir/build
 
-CMakeFiles/Compiler.dir/requires: CMakeFiles/Compiler.dir/Compiler.cpp.o.requires
+CMakeFiles/Compiler.dir/requires: CMakeFiles/Compiler.dir/main.cpp.o.requires
+CMakeFiles/Compiler.dir/requires: CMakeFiles/Compiler.dir/Analysis.cpp.o.requires
+CMakeFiles/Compiler.dir/requires: CMakeFiles/Compiler.dir/Generate.cpp.o.requires
 
 .PHONY : CMakeFiles/Compiler.dir/requires
 

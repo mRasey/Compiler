@@ -123,32 +123,86 @@ Compiler/fast:
 	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/build
 .PHONY : Compiler/fast
 
-Compiler.o: Compiler.cpp.o
+Analysis.o: Analysis.cpp.o
 
-.PHONY : Compiler.o
+.PHONY : Analysis.o
 
 # target to build an object file
-Compiler.cpp.o:
-	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Compiler.cpp.o
-.PHONY : Compiler.cpp.o
+Analysis.cpp.o:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Analysis.cpp.o
+.PHONY : Analysis.cpp.o
 
-Compiler.i: Compiler.cpp.i
+Analysis.i: Analysis.cpp.i
 
-.PHONY : Compiler.i
+.PHONY : Analysis.i
 
 # target to preprocess a source file
-Compiler.cpp.i:
-	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Compiler.cpp.i
-.PHONY : Compiler.cpp.i
+Analysis.cpp.i:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Analysis.cpp.i
+.PHONY : Analysis.cpp.i
 
-Compiler.s: Compiler.cpp.s
+Analysis.s: Analysis.cpp.s
 
-.PHONY : Compiler.s
+.PHONY : Analysis.s
 
 # target to generate assembly for a file
-Compiler.cpp.s:
-	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Compiler.cpp.s
-.PHONY : Compiler.cpp.s
+Analysis.cpp.s:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Analysis.cpp.s
+.PHONY : Analysis.cpp.s
+
+Generate.o: Generate.cpp.o
+
+.PHONY : Generate.o
+
+# target to build an object file
+Generate.cpp.o:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Generate.cpp.o
+.PHONY : Generate.cpp.o
+
+Generate.i: Generate.cpp.i
+
+.PHONY : Generate.i
+
+# target to preprocess a source file
+Generate.cpp.i:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Generate.cpp.i
+.PHONY : Generate.cpp.i
+
+Generate.s: Generate.cpp.s
+
+.PHONY : Generate.s
+
+# target to generate assembly for a file
+Generate.cpp.s:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Generate.cpp.s
+.PHONY : Generate.cpp.s
+
+main.o: main.cpp.o
+
+.PHONY : main.o
+
+# target to build an object file
+main.cpp.o:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/main.cpp.o
+.PHONY : main.cpp.o
+
+main.i: main.cpp.i
+
+.PHONY : main.i
+
+# target to preprocess a source file
+main.cpp.i:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/main.cpp.i
+.PHONY : main.cpp.i
+
+main.s: main.cpp.s
+
+.PHONY : main.s
+
+# target to generate assembly for a file
+main.cpp.s:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/main.cpp.s
+.PHONY : main.cpp.s
 
 # Help Target
 help:
@@ -159,9 +213,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Compiler"
-	@echo "... Compiler.o"
-	@echo "... Compiler.i"
-	@echo "... Compiler.s"
+	@echo "... Analysis.o"
+	@echo "... Analysis.i"
+	@echo "... Analysis.s"
+	@echo "... Generate.o"
+	@echo "... Generate.i"
+	@echo "... Generate.s"
+	@echo "... main.o"
+	@echo "... main.i"
+	@echo "... main.s"
 .PHONY : help
 
 

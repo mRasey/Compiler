@@ -6,7 +6,15 @@
 
 #IncludeRegexTransform: 
 
-/Users/billy/Documents/Github/Compiler/Compiler.cpp
+/Users/billy/Documents/Github/Compiler/Analysis.cpp
+Analysis.h
+/Users/billy/Documents/Github/Compiler/Analysis.h
+
+/Users/billy/Documents/Github/Compiler/Analysis.h
+string
+-
+vector
+-
 string.h
 -
 stdbool.h
@@ -21,12 +29,18 @@ sstream
 -
 iomanip
 -
-vector
--
-Compiler.h
-/Users/billy/Documents/Github/Compiler/Compiler.h
 
-/Users/billy/Documents/Github/Compiler/Compiler.h
-string
--
+/Users/billy/Documents/Github/Compiler/Generate.cpp
+Generate.h
+/Users/billy/Documents/Github/Compiler/Generate.h
+Analysis.h
+/Users/billy/Documents/Github/Compiler/Analysis.h
+
+/Users/billy/Documents/Github/Compiler/Generate.h
+
+/Users/billy/Documents/Github/Compiler/main.cpp
+Analysis.h
+/Users/billy/Documents/Github/Compiler/Analysis.h
+Generate.h
+/Users/billy/Documents/Github/Compiler/Generate.h
 
