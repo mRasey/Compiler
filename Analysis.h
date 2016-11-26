@@ -93,6 +93,10 @@ typedef enum {
     qJle,//a <= b 跳转
     qJ,//无条件跳转
     qJFunc,
+    qGetReturnInt,//从v0取函数返回值
+    qGetReturnChar,//从v0取函数返回值
+    qPutReturnInt,//向v0放返回值
+    qPutReturnChar,//向v0放返回值
     qGetArrayValue,//取数组值
     qGetArrayIntValue,//取整型数组值
     qGetArrayCharValue,//取字符型数组值
@@ -102,6 +106,10 @@ typedef enum {
     qAssignCharArray,//赋值
     qReverse,//a取反
     qPassParam,//传参
+    qPassIntParam,//传int参
+    qPassCharParam,//传int参
+    qGetIntParam,//取int参
+    qGetCharParam,//取char参
     qReturn,//返回
     qScanf,//输入
     qScanfInt,//输入
@@ -110,7 +118,7 @@ typedef enum {
     qPrintfString,//输出
     qPrintfInt,//输出
     qSaveAddr,//存入内存
-    qLoadAddr//加载至寄存器
+    qLoadAddr,//加载至寄存器
 } QuadCodeInstr;
 
 //间隔符
@@ -169,6 +177,7 @@ typedef struct {
     char charValue;//如果是常量声明则记录声明的字符值
     bool isArray;//记录是否是数组
     int arraySize;//如果是数组则记录数组的大小
+    string addr;//相对于基地址的地址
 } FuncParamTableItem;
 
 string getStrQCode(QuadCodeInstr instr) ;
@@ -178,6 +187,7 @@ void printFuncParamTable() ;
 bool isinterval(char c) ;
 bool isKeyword(char* s) ;
 bool isNumber(char* s) ;
+bool isANumber(string s) ;
 bool isChar(char* s) ;
 string itoa(int i) ;
 string ctoa(char a) ;

@@ -8,8 +8,6 @@
 #include "Analysis.h"
 
 typedef struct {
-    string name;//变量名
-    string belongFunc;//所属函数
     int value;//变量值
 } TmpVarItem;
 

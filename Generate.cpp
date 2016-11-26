@@ -33,6 +33,7 @@ extern FuncParamTableItem funcParamTable[1024];//函数表
 extern int funcParamTablePointer;//函数表指针
 extern QuadCodeTableItem qCodeInstrs[1024];//四元式表
 extern int qCodePointer;//四元式指针
+
 TmpVarItem tmpVarTable[1024];//临时变量表
 int tmpVarTablePointer = 0;//临时变量表指针
 extern string currentDealFunc;//当前处理函数名
@@ -40,8 +41,22 @@ extern string printStrings[1024];
 extern int printStringsPointer;
 int qCodeTableScanner = 0;//四元式表扫描指针
 
+/**
+ * 字符串转数字
+ * @param s
+ * @return
+ */
+int stringToInt(string s) {
+    return std::atoi(s.c_str());
+}
 
-
+/**
+ * 添加新的mips指令
+ * @param opName
+ * @param op1
+ * @param op2
+ * @param op3
+ */
 void addNewMipsCode(string opName, string op1, string op2, string op3) {
     CodeTableItem *cti = &codeTable[codeTablePointer++];
     cti->name = opName;
@@ -60,6 +75,190 @@ void printAllMipsCode() {
         std::cout << left << setw(15) << cti->operand1;
         std::cout << left << setw(15) << cti->operand2;
         std::cout << left << setw(15) << cti->operand3 << endl;
+    }
+}
+
+/**
+ * 通过临时变量编号获得临时变量地址
+ * @param qcti
+ * @return
+ */
+string getAddrFromShape(string s) {
+    int index =  std::atoi(s.substr(1, s.length()).c_str());
+    return  "-" + itoa((index + 1) * 4) + "(sp)";
+}
+
+string getTmpVarAddr(string tmpVar) {
+    int index = std::atoi(tmpVar.substr(1, tmpVar.length()).c_str());//去掉#并转换成数字
+    return itoa((-4) * (index + 1)) + "($sp)";
+}
+
+/**
+ * 通过分析全局数组下标的种类添加不同的指令
+ * @return
+ */
+void getOverallArrayShiftAndAddMips(string arrayAddr, string op2, string reg1, string reg2, string tVarAddr) {
+    if(isANumber(op2)) { //如果是数字则直接
+        int shift = std::atoi(op2.c_str());
+        addNewMipsCode("lw", reg1, arrayAddr + "+" + itoa(shift * 4), "");
+    }
+    else if(op2.substr(0, 1) == "#") { //如果是临时变量就用寄存器将变量的值加载至寄存器然后array($reg)
+//        int tIndex = std::atoi(op.substr(1, op.length()).c_str());
+        addNewMipsCode("lw", reg1, getTmpVarAddr(op2), "");//加载偏移至指定寄存器
+        addNewMipsCode("lw", reg2, arrayAddr + "( + " + reg1 +  ")", "");//根据偏移加载数组值至指定寄存器
+        addNewMipsCode("sw", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
+    }
+    else { //如果是全局或局部变量
+        vector<string> findResult = findInAllTable(op2);
+        if(findResult.at(1) == "overall") { //如果是全局变量
+            int index = std::atoi(findResult.at(2).c_str());
+            TokenTableItem tti = tokenTable[index];
+            addNewMipsCode("lw", reg1, op2, "");//通过标签加载值进内存
+            addNewMipsCode("lw", reg2, arrayAddr + "( + " + reg1 +  ")", "");//根据偏移加载数组值至指定寄存器
+            addNewMipsCode("sw", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
+        }
+        else { //如果是局部变量
+            int index = std::atoi(findResult.at(2).c_str());
+            FuncParamTableItem fpti = funcParamTable[index];
+            addNewMipsCode("lw", reg1, fpti.addr, "");//通过标签加载值进内存
+            addNewMipsCode("lw", reg2, arrayAddr + "( + " + reg1 +  ")", "");//根据偏移加载数组值至指定寄存器
+            addNewMipsCode("sw", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
+        }
+    }
+}
+
+/**
+ * 通过分析局部数组下标的种类添加不同的指令
+ * @param fpci
+ * @param op2
+ * @param reg1
+ * @param reg2
+ * @param tmpVarAddr 存储最终从数组中取出的值的临时变量的地址
+ */
+void getInnerArrayShiftAndAddMips(FuncParamTableItem fpci, string op2, string reg1, string reg2, string tmpVarAddr) {
+    if(isANumber(op2)) {
+        int shift = std::atoi(op2.c_str());;
+        int baseAddr = stringToInt(fpci.addr);
+        int shiftAddr = baseAddr + shift * 4;
+        string shiftSp = itoa(shiftAddr) + "($sp)";
+        addNewMipsCode("lw", reg1, shiftSp, "");
+        addNewMipsCode("sw", reg1, tmpVarAddr, "");
+    }
+    else if(op2.substr(0, 1) == "#") { //如果是临时变量则从相应地址中加载值进寄存器
+        addNewMipsCode("lw", reg1, getTmpVarAddr(op2), "");
+        addNewMipsCode("sub", reg1, fpci.addr, reg1);//reg1保存相对fp的偏移地址
+        addNewMipsCode("sub", reg1, "$fp", reg1);
+        addNewMipsCode("lw", reg2, reg1, "");//从reg1中存储的地址中加载值
+        addNewMipsCode("sw", reg2, tmpVarAddr, "");
+    }
+    else { //如果是全局变量或者局部变量
+        vector<string> findResult = findInAllTable(op2);
+        int index = stringToInt(findResult.at(2));
+        if(findResult.at(1) == "overall") { //如果是全局变量
+            addNewMipsCode("lw", reg1, op2, "");//通过标签加载全局变量的值到寄存器
+            addNewMipsCode("mul", reg1, reg1, "4");//将值乘4作为偏移
+            addNewMipsCode("sub", reg1, fpci.addr, reg1);//reg1保存相对fp的偏移地址
+            addNewMipsCode("sub", reg1, "$fp", reg1);
+            addNewMipsCode("lw", reg2, reg1, "");//从reg1中存储的地址中加载值
+            addNewMipsCode("sw", reg2, tmpVarAddr, "");
+        }
+        else { //如果是局部变量
+            FuncParamTableItem tmpFpci = funcParamTable[index];
+            addNewMipsCode("lw", reg1, tmpFpci.addr, "");
+            addNewMipsCode("mul", reg1, reg1, "4");//将值乘4作为偏移
+            addNewMipsCode("sub", reg1, fpci.addr, reg1);//reg1保存相对fp的偏移地址
+            addNewMipsCode("sub", reg1, "$fp", reg1);
+            addNewMipsCode("lw", reg2, reg1, "");//从reg1中存储的地址中加载值
+            addNewMipsCode("sw", reg2, tmpVarAddr, "");
+        }
+    }
+}
+
+/**
+ * 处理对数组赋值的指令并生成mips代码
+ * @param op1
+ * @param op2
+ * @param op3
+ * @param reg1
+ * @param reg2
+ * @param reg3
+ */
+void assignArrayShiftAndAddMips(string op1, string op2, string op3, string reg1, string reg2, string reg3) {
+    if(isANumber(op1)) { //如果op1是一个数字
+        addNewMipsCode("li", reg1, op1, "");//将要赋的值存储在reg1
+    }
+    else if(op1.substr(0, 1) == "#") { //如果op1是一个临时变量
+        addNewMipsCode("lw", reg1, getTmpVarAddr(op1), "");
+    }
+    else { //如果op1是全局或局部变量
+        vector<string> findResult1 = findInAllTable(op1);
+        if(findResult1.at(1) == "overall") { //如果是一个全局变量
+            addNewMipsCode("lw", reg1, op1, "");
+        }
+        else { //如果是一个局部变量
+            FuncParamTableItem fpti = funcParamTable[stringToInt(findResult1.at(2))];//取出在参数表中的项
+            addNewMipsCode("lw", reg1, fpti.addr, "");
+        }
+    }
+
+    if(isANumber(op2)) { //如果op2是一个数字
+        addNewMipsCode("li", reg2, op1, "");//将要赋的值存储在reg1
+    }
+    else if(op2.substr(0, 1) == "#") { //如果op2是一个全局变量
+        addNewMipsCode("lw", reg2, getTmpVarAddr(op1), "");
+    }
+    else {
+        vector<string> findResult2 = findInAllTable(op2);
+        if(findResult2.at(1) == "overall") { //如果op2是一个全局变量
+            addNewMipsCode("lw", reg2, op1, "");
+        }
+        else { //如果op2是一个局部变量
+            FuncParamTableItem fpti = funcParamTable[stringToInt(findResult2.at(2))];//取出在参数表中的项
+            addNewMipsCode("lw", reg2, fpti.addr, "");
+        }
+    }
+
+    vector<string> findResult3 = findInAllTable(op3);
+    if(findResult3.at(1) == "overall") { //如果是一个全局变量
+        addNewMipsCode("la", reg3, op3, "");//将全局变量的地址加载到寄存器
+        addNewMipsCode("sub", reg3, op3, reg2);//将地址加上reg2的偏移
+        addNewMipsCode("sw", reg1, reg3, "");//将reg1的值存储到指定地址
+    }
+    else {
+        FuncParamTableItem fpti = funcParamTable[stringToInt(findResult3.at(2))];
+        addNewMipsCode("sub",reg3, "$fp", fpti.addr);//将数组的基地址保存在reg3中
+        addNewMipsCode("mul", reg2, reg2, "4");//将下标乘4作为偏移地址
+        addNewMipsCode("sub",reg3, reg3, reg2);//将保存在reg2中的下标的偏移地址作为基地址的偏移
+        addNewMipsCode("sw", reg1, reg3, "");//将reg1的值存储到reg3中的指定地址
+    }
+}
+
+/**
+ * 通过分析操作数的不同种类返回不同的地址
+ * @param op
+ * @return
+ */
+string getAddressAndAddMipsInstrByOpKind(string op, string reg) {
+    if(isANumber(op)) {
+        addNewMipsCode("li", reg, op, "");//如果是数字则加载立即数
+        return op;
+    }
+    else if (op.substr(0, 1) == "#") { //如果是临时变量
+        addNewMipsCode("li", reg, getAddrFromShape(op), "");//从sp的偏移加载临时变量
+        return getAddrFromShape(op);
+    }
+    else {
+        vector<string> findResult = findInAllTable(op);
+        if(findResult.at(1) == "overall") { //如果是全局变量，就使用data区的标签
+            addNewMipsCode("lw", reg, op, "");//否则从内存加载至寄存器
+            return op;
+        }
+        else {
+            int pIndex = std::atoi(findResult.at(2).c_str());
+            FuncParamTableItem fpci = funcParamTable[pIndex];
+            addNewMipsCode("lw", reg, fpci.addr, "");//否则从内存加载至寄存器
+            return fpci.addr;
+        }
     }
 }
 
@@ -139,106 +338,454 @@ void generateOverallVar() {
  */
 void generateFunc(QuadCodeTableItem qcti) {
     currentDealFunc = qcti.operand1.substr(0, qcti.operand1.length() - 1);//函数名标签
+    addNewMipsCode(qcti.operand1, "", "", "");//添加函数标签
     int index = findTokenInTable(currentDealFunc);//找到函数名在符号表中的位置
     TokenTableItem tti = tokenTable[index];
     int startIndex = tti.paramAddr;
     int paramAccount = tti.paramAccount;//参数个数
     int localVarAccount = tti.localVarAccount;//局部变量个数
-    addNewMipsCode(currentDealFunc, "", "", "");//函数名标签指令
-    addNewMipsCode("sw", "$fp", "($sp)", "");//保存当前的fp指针
-    addNewMipsCode("move", "$fp", "$sp", "");//保存当前sp指针为fp指针
-    addNewMipsCode("subu", "$sp", "$sp", "");//申请局部变量的空间
-    addNewMipsCode("sw", "$ra", "-4($fp)", "");//保存返回地址
-    addNewMipsCode("sw", "$v0", "-8($fp)", "");//保存返回值
+    int localVarPointer = 0;//局部变量指针
+    int fpShift = 12;
+    int tIndex = 0;//临时变量的下标
+//    addNewMipsCode(currentDealFunc, "", "", "");//函数名标签指令
+//    addNewMipsCode("sw", "$fp", "($sp)", "");//保存当前的fp指针
+//    addNewMipsCode("move", "$fp", "$sp", "");//将fp指针挪到sp的位置
+//    addNewMipsCode("subu", "$sp", "$sp", "");//申请局部变量的空间
+//    addNewMipsCode("sw", "$ra", "-4($fp)", "");//保存返回地址
+//    addNewMipsCode("sw", "$v0", "-8($fp)", "");//保存返回值
 
+    FuncParamTableItem fpci;
+    vector<string> findResult;
+    string reg1;
+    string reg2;
+    string reg3;
     while(true) {
         qcti = qCodeInstrs[qCodeTableScanner++];
+        string op1 = qcti.operand1;
+        string op2 = qcti.operand2;
+        string op3 = qcti.result;
         switch (qcti.quadCodeInstr) {
             case qNewIntCons:
+                //记录在内存的相对地址
+                fpci = funcParamTable[startIndex + paramAccount + localVarPointer++];
+                fpci.addr = "-" + itoa(fpShift) + "($fp)";
+                fpShift += 4;
                 break;
             case qNewCharCons:
+                //记录在内存的相对地址
+                fpci = funcParamTable[startIndex+paramAccount+localVarPointer++];
+                fpci.addr = "-" + itoa(fpShift) + "($fp)";
+                fpShift += 4;
                 break;
             case qNewIntVar:
+                if(op1.substr(0, 1) == "#") { //如果是临时变量则添加到临时变量表
+                    //todo 临时变量则添加到临时变量表
+                }
+                else {
+                    fpci = funcParamTable[startIndex + paramAccount + localVarPointer++];
+                    fpci.addr = "-" + itoa(fpShift) + "($fp)";
+                    fpShift += 4;
+                }
                 break;
             case qNewCharVar:
+                if(op1.substr(0, 1) == "#") { //如果是临时变量则添加到临时变量表
+                    //todo 临时变量则添加到临时变量表
+                }
+                else {
+                    fpci = funcParamTable[startIndex + paramAccount + localVarPointer++];
+                    fpci.addr = "-" + itoa(fpShift) + "($fp)";
+                    fpShift += 4;
+                }
                 break;
             case qNewIntArray:
+                //记录在内存的起始地址和长度
+                fpci = funcParamTable[startIndex + paramAccount + localVarPointer++];
+                fpci.addr = "-" + itoa(fpShift);
+                fpShift += fpci.arraySize * 4;
                 break;
             case qNewCharArray:
+                //记录在内存的起始地址和长度
+                fpci = funcParamTable[startIndex + paramAccount + localVarPointer++];
+                fpci.addr = "-" + itoa(fpShift);
+                fpShift += fpci.arraySize * 4;
                 break;
             case qLabel:
+                addNewMipsCode(op1, "", "", "");//添加普通标签
                 break;
             case qFuncLabel:
+                cout << "error" << endl;
                 break;
             case qFuncEndLabel:
+                addNewMipsCode(op1, "", "", "");//函数结束标签
                 addNewMipsCode("lw", "$ra", "-4($fp)", "");//保存返回地址
                 addNewMipsCode("move", "$sp", "$fp", "");//退栈
                 addNewMipsCode("lw", "$fp", "($fp)", "");//获得之前的fp指针
                 addNewMipsCode("jr", "$ra", "", "");//return
                 return;
-            case qCallFunc:
-                break;
             case qPlus:
+                //操作数1
+                getAddressAndAddMipsInstrByOpKind(op1, "$t8");//将操作数1加载至寄存器
+                getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
+                addNewMipsCode("add", "$t9", "$t8", "$t9");//计算
+                tIndex = std::atoi(op3.substr(1, op3.length()).c_str());
+                addNewMipsCode("sw", "$t9", "-" + itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
                 break;
             case qSub:
+                getAddressAndAddMipsInstrByOpKind(op1, "$t8");//将操作数1加载至寄存器
+                getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
+                addNewMipsCode("sub", "$t9", "$t8", "$t9");//计算
+                tIndex = std::atoi(op3.substr(1, op3.length()).c_str());
+                addNewMipsCode("sw", "$t9", "-" + itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
                 break;
             case qMul:
+                getAddressAndAddMipsInstrByOpKind(op1, "$t8");//将操作数1加载至寄存器
+                getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
+                addNewMipsCode("mul", "$t9", "$t8", "$t9");//计算
+                tIndex = std::atoi(op3.substr(1, op3.length()).c_str());
+                addNewMipsCode("sw", "$t9", "-" + itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
                 break;
             case qDiv:
+                getAddressAndAddMipsInstrByOpKind(op1, "$t8");//将操作数1加载至寄存器
+                getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
+                addNewMipsCode("div", "$t9", "$t8", "$t9");//计算
+                tIndex = std::atoi(op3.substr(1, op3.length()).c_str());
+                addNewMipsCode("sw", "$t9", "-" + itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
                 break;
             case qJl:
+                getAddressAndAddMipsInstrByOpKind(op1, "$t8");//将操作数1加载至寄存器
+                getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
+                addNewMipsCode("blt", "$t8", "$t9", op3);
                 break;
             case qJg:
+                getAddressAndAddMipsInstrByOpKind(op1, "$t8");//将操作数1加载至寄存器
+                getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
+                addNewMipsCode("bgt", "$t8", "$t9", op3);
                 break;
             case qJne:
+                getAddressAndAddMipsInstrByOpKind(op1, "$t8");//将操作数1加载至寄存器
+                getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
+                addNewMipsCode("bne", "$t8", "$t9", op3);
                 break;
             case qJle:
+                getAddressAndAddMipsInstrByOpKind(op1, "$t8");//将操作数1加载至寄存器
+                getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
+                addNewMipsCode("ble", "$t8", "$t9", op3);
                 break;
             case qJge:
+                getAddressAndAddMipsInstrByOpKind(op1, "$t8");//将操作数1加载至寄存器
+                getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
+                addNewMipsCode("bge", "$t8", "$t9", op3);
                 break;
             case qJe:
+                getAddressAndAddMipsInstrByOpKind(op1, "$t8");//将操作数1加载至寄存器
+                getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
+                addNewMipsCode("beq", "$t8", "$t9", op3);
                 break;
             case qJ:
+                addNewMipsCode("j", qcti.operand1, "", "");
+                break;
+            case qJFunc:
+                addNewMipsCode("sw", "$fp", "($sp)", "");//保存当前的fp指针
+                addNewMipsCode("move", "$fp", "$sp", "");//将fp指针挪到sp的位置
+                int shift = 0;//计算局部变量偏移
+                if(paramAccount <= 4)
+                    shift = localVarAccount * 4;
+                else
+                    shift = (paramAccount + localVarAccount - 4) * 4;
+                addNewMipsCode("subu", "$sp", "$sp", itoa(shift));//申请局部变量的空间
+                addNewMipsCode("sw", "$ra", "-4($fp)", "");//保存返回地址
+                addNewMipsCode("sw", "$v0", "-8($fp)", "");//保存返回值
+                addNewMipsCode("j", qcti.operand1, "", "");//跳转
+                if(paramAccount > 4) { //todo 退出传递参数时候使用的栈
+                    addNewMipsCode("subu", "$sp", "$sp", itoa((paramAccount - 4) * 4));//todo 退出传递参数时候使用的栈
+                }
                 break;
             case qGetArrayIntValue:
+                findResult = findInAllTable(op1);
+                if(findResult.at(1) == "overall") {
+                    getOverallArrayShiftAndAddMips(op1, op2, "$t8", "$t9", getTmpVarAddr(op3));
+                }
+                else {
+                    FuncParamTableItem fpti = funcParamTable[index];
+                    getInnerArrayShiftAndAddMips(fpti, op2, "$t8", "$9", getTmpVarAddr(op3));
+                }
                 break;
             case qGetArrayCharValue:
+                findResult = findInAllTable(op1);
+                if(findResult.at(1) == "overall") {
+                    getOverallArrayShiftAndAddMips(op1, op2, "$t8", "$t9", getTmpVarAddr(op3));
+                }
+                else {
+                    FuncParamTableItem fpti = funcParamTable[index];
+                    getInnerArrayShiftAndAddMips(fpti, op2, "$t8", "$9", getTmpVarAddr(op3));
+                }
                 break;
             case qAssignInt:
+                if(op1.substr(0, 1) == "#") { //如果op1是临时变量
+                    addNewMipsCode("lw", "$t8", getTmpVarAddr(op1), "");
+                    vector<string> findResult2 = findInAllTable(op2);
+                    if(findResult2.at(1) == "overall") { //如果op2是全局变量
+                        addNewMipsCode("sw", "$t8", op2, "");//将寄存器的值存至目标寄存器
+                    }
+                    else { //op2是局部变量
+                        FuncParamTableItem fpti2 = funcParamTable[stringToInt(findResult2.at(2))];
+                        addNewMipsCode("sw", "$t8", fpti2.addr, "");//将寄存器的值存至目标寄存器
+                    }
+                }
+                else { //如果op1是全局或临时变量
+                    vector<string > findResult1 = findInAllTable(op1);
+                    if(findResult1.at(1) == "overall") { //如果op1是全局变量
+                        vector<string> findResult2 = findInAllTable(op2);
+                        if(findResult2.at(1) == "overall") { //如果op2是全局变量
+                            addNewMipsCode("lw", "$t8", op1, "");//将op1加载至寄存器
+                            addNewMipsCode("sw", "$t8", op2, "");//将寄存器的值存至目标寄存器
+                        }
+                        else { //op2是局部变量
+                            FuncParamTableItem fpti2 = funcParamTable[stringToInt(findResult.at(2))];
+                            addNewMipsCode("lw", "$t8", op1, "");//将op1加载至寄存器
+                            addNewMipsCode("sw", "$t8", fpti2.addr, "");//将寄存器的值存至目标寄存器
+                        }
+                    }
+                    else { //op1是局部变量
+                        vector<string> findResult2 = findInAllTable(op2);
+                        FuncParamTableItem fpti1 = funcParamTable[stringToInt(findResult1.at(0))];
+                        if(findResult2.at(1) == "overall") { //如果op2是全局变量
+                            addNewMipsCode("lw", "$t8", fpti1.addr, "");//将op1加载至寄存器
+                            addNewMipsCode("sw", "$t8", op2, "");//将寄存器的值存至目标寄存器
+                        }
+                        else { //op2是局部变量
+                            FuncParamTableItem fpti2 = funcParamTable[stringToInt(findResult2.at(2))];
+                            addNewMipsCode("lw", "$t8", fpti1.addr, "");//将op1加载至寄存器
+                            addNewMipsCode("sw", "$t8", fpti2.addr, "");//将寄存器的值存至目标寄存器
+                        }
+                    }
+                }
                 break;
             case qAssignChar:
+                if(op1.substr(0, 1) == "#") { //如果op1是临时变量
+                    addNewMipsCode("lw", "$t8", getTmpVarAddr(op1), "");
+                    vector<string> findResult2 = findInAllTable(op2);
+                    if(findResult2.at(1) == "overall") { //如果op2是全局变量
+                        addNewMipsCode("sw", "$t8", op2, "");//将寄存器的值存至目标寄存器
+                    }
+                    else { //op2是局部变量
+                        FuncParamTableItem fpti2 = funcParamTable[stringToInt(findResult2.at(2))];
+                        addNewMipsCode("sw", "$t8", fpti2.addr, "");//将寄存器的值存至目标寄存器
+                    }
+                }
+                else { //如果op1是全局或临时变量
+                    vector<string > findResult1 = findInAllTable(op1);
+                    if(findResult1.at(1) == "overall") { //如果op1是全局变量
+                        vector<string> findResult2 = findInAllTable(op2);
+                        if(findResult2.at(1) == "overall") { //如果op2是全局变量
+                            addNewMipsCode("lw", "$t8", op1, "");//将op1加载至寄存器
+                            addNewMipsCode("sw", "$t8", op2, "");//将寄存器的值存至目标寄存器
+                        }
+                        else { //op2是局部变量
+                            FuncParamTableItem fpti2 = funcParamTable[stringToInt(findResult.at(2))];
+                            addNewMipsCode("lw", "$t8", op1, "");//将op1加载至寄存器
+                            addNewMipsCode("sw", "$t8", fpti2.addr, "");//将寄存器的值存至目标寄存器
+                        }
+                    }
+                    else { //op1是局部变量
+                        vector<string> findResult2 = findInAllTable(op2);
+                        FuncParamTableItem fpti1 = funcParamTable[stringToInt(findResult1.at(0))];
+                        if(findResult2.at(1) == "overall") { //如果op2是全局变量
+                            addNewMipsCode("lw", "$t8", fpti1.addr, "");//将op1加载至寄存器
+                            addNewMipsCode("sw", "$t8", op2, "");//将寄存器的值存至目标寄存器
+                        }
+                        else { //op2是局部变量
+                            FuncParamTableItem fpti2 = funcParamTable[stringToInt(findResult2.at(2))];
+                            addNewMipsCode("lw", "$t8", fpti1.addr, "");//将op1加载至寄存器
+                            addNewMipsCode("sw", "$t8", fpti2.addr, "");//将寄存器的值存至目标寄存器
+                        }
+                    }
+                }
                 break;
             case qAssignIntArray:
+                assignArrayShiftAndAddMips(op1, op2, op3, "$t7", "$t8", "$t9");
                 break;
             case qAssignCharArray:
+                assignArrayShiftAndAddMips(op1, op2, op3, "$t7", "$t8", "$t9");
                 break;
             case qReverse:
+                reg1 = "$t8";
+                if(op1.substr(0, 1) == "#") { //如果是临时变量
+                    addNewMipsCode("lw", reg1, getTmpVarAddr(op1), "");
+                }
+                else {
+                    vector<string> findResult1 = findInAllTable(op1);
+                    if(findResult1.at(1) == "overall") { //如果是全局变量
+                        addNewMipsCode("lw", reg1, op1, "");
+                    }
+                    else { //如果是局部变量
+                        FuncParamTableItem fpti = funcParamTable[stringToInt(findResult1.at(2))];
+                        addNewMipsCode("lw", reg1, fpti.addr, "");
+                    }
+                }
+                addNewMipsCode("mul", reg1, reg1, "-1");//取反
+                if(op2.substr(0, 1) == "#") { //如果是临时变量
+                    addNewMipsCode("sw", reg1, getTmpVarAddr(op2), "");
+                }
+                else {
+                    vector<string> findResult1 = findInAllTable(op1);
+                    if(findResult1.at(1) == "overall") { //如果是全局变量
+                        addNewMipsCode("sw", reg1, op2, "");
+                    }
+                    else { //如果是局部变量
+                        FuncParamTableItem fpti = funcParamTable[stringToInt(findResult1.at(2))];
+                        addNewMipsCode("sw", reg1, fpti.addr, "");
+                    }
+                }
                 break;
-            case qPassParam:
+            case qPassIntParam:
+            case qPassCharParam:
+                int passIndex = 0;
+                reg1 = "$t8";
+                string passParamSaveAddr = "";
+                while(qcti.quadCodeInstr == qPassIntParam || qcti.quadCodeInstr == qPassCharParam) {
+                    if(passIndex < 4) { //如果小于4则使用a寄存器
+                        passParamSaveAddr = "$a" + passIndex;
+                        if(isANumber(op1)) { //如果是一个数字
+                            addNewMipsCode("li", passParamSaveAddr, op1, "");
+                        }
+                        else if(op1.substr(0, 1) == "#") { //如果是临时变量
+                            addNewMipsCode("lw", passParamSaveAddr, getTmpVarAddr(op1), "");
+                        }
+                        else {
+                            vector<string> findResult1 = findInAllTable(op1);
+                            if(findResult1.at(1) == "overall") { //如果是全局变量
+                                addNewMipsCode("lw", passParamSaveAddr, op1, "");
+                            }
+                            else { //如果是局部变量
+                                FuncParamTableItem fpti = funcParamTable[stringToInt(findResult1.at(2))];
+                                addNewMipsCode("lw", passParamSaveAddr, fpti.addr, "");
+                            }
+                        }
+                    }
+                    else { //否则使用运行栈
+                        addNewMipsCode("sub", "$sp", "$sp", "4");//申请新的sp空间
+                        if(isANumber(op1)) { //如果是一个数字
+                            addNewMipsCode("li", reg1, op1, "");
+                            addNewMipsCode("sw", reg1, "($sp)", "");
+                        }
+                        else if(op1.substr(0, 1) == "#") { //如果是临时变量
+                            addNewMipsCode("lw", reg1, getTmpVarAddr(op1), "");
+                            addNewMipsCode("sw", reg1, "($sp)", "");
+                        }
+                        else {
+                            vector<string> findResult1 = findInAllTable(op1);
+                            if(findResult.at(1) == "overall") { //如果是全局变量
+                                addNewMipsCode("lw", reg1, op1, "");
+                                addNewMipsCode("sw", reg1, "($sp)", "");
+                            }
+                            else { //如果是局部变量
+                                FuncParamTableItem fpti = funcParamTable[stringToInt(findResult1.at(2))];
+                                addNewMipsCode("lw", reg1, fpti.addr, "");
+                                addNewMipsCode("sw", reg1, "($sp)", "");
+                            }
+                        }
+                    }
+
+                    addNewMipsCode("lw", "$a" + itoa(passIndex), "", "");
+                    qcti = qCodeInstrs[qCodePointer++];
+                    op1 = qcti.operand1;
+                    op2 = qcti.operand2;
+                    op3 = qcti.result;
+                    passIndex++;
+                }
+                qCodeTableScanner--;
                 break;
-            case qReturn:
+            case qGetIntParam:
+            case qGetCharParam:
+                int getIndex = 0;
+                reg1 = "";
+                string getParamSaveAddr = "";
+                reg1 = "$t8";
+                int i = paramAccount;//参数个数
+                while(qcti.quadCodeInstr == qGetIntParam || qcti.quadCodeInstr == qGetCharParam) {
+                    if(getIndex < 4) { //如果小于4则从a寄存器里取值
+                        addNewMipsCode("sw", "$a" + itoa(getIndex), itoa(- (getIndex + 3) * 4) + "($fp)", "");
+                    }
+                    else { //否则从栈中取值
+                        addNewMipsCode("lw", reg1, itoa((i - 4) * 4) + "($fp)", "");
+                        addNewMipsCode("sw", reg1, itoa((getIndex - 3) * 4) + "($fp)", "");
+                        i--;
+                    }
+                    qcti = qCodeInstrs[qCodePointer++];
+                    op1 = qcti.operand1;
+                    op2 = qcti.operand2;
+                    op3 = qcti.result;
+                    getIndex++;
+                }
+                qCodeTableScanner--;
                 break;
             case qScanfInt:
                 addNewMipsCode("li", "$v0", "5", "");
                 addNewMipsCode("syscall", "", "", "");
                 break;
             case qScanfChar:
-                addNewMipsCode("li", "$v0", "5", "");
+                addNewMipsCode("li", "$v0", "12", "");
                 addNewMipsCode("syscall", "", "", "");
                 break;
             case qPrintfString:
-                addNewMipsCode("la", "$a0", qcti.operand1, "");
+                addNewMipsCode("la", "$a0", op1, "");
                 addNewMipsCode("li", "$v0", "4", "");
                 addNewMipsCode("syscall", "", "", "");
                 break;
             case qPrintfInt:
-                addNewMipsCode("li", "$a0", qcti.operand1, "");//todo 替换成地址
+                if(isANumber(op1)) { //如果是一个数字
+                    addNewMipsCode("li", "$a0", op1, "");
+                }
+                else if(op1.substr(0, 1) == "#") { //如果是一个临时变量
+                    addNewMipsCode("lw", "$a0", getTmpVarAddr(op1), "");
+                }
+                else {
+                    vector<string> findResult1 = findInAllTable(op1);
+                    if(findResult1.at(1) == "overall") { //如果是一个全局变量
+                        addNewMipsCode("lw", "$a0", op1, "");
+                    }
+                    else { //如果是一个局部变量
+                        FuncParamTableItem fpti = funcParamTable[stringToInt(findResult1.at(2))];
+                        addNewMipsCode("lw", "$a0", fpti.addr, "");
+                    }
+                }
                 addNewMipsCode("li", "$v0", "1", "");
                 addNewMipsCode("syscall", "", "", "");
+                break;
+            case qGetReturnInt:
+            case qGetReturnChar:
+                addNewMipsCode("sw", "$v0", getTmpVarAddr(op2), "");//从v0寄存器中取值
+                break;
+            case qPutReturnInt:
+            case qPutReturnChar:
+                reg1 = "$t8";
+                if(isANumber(op1)) { //op1如果是一个数字
+                    addNewMipsCode("li", reg1, op1, "");
+                }
+                else if(op1.substr(0, 1) == "#") { //如果是一个临时变量
+                    addNewMipsCode("lw", "$v0", "", "");
+                }
+                else { //如果是一个全局或局部变量
+                    vector<string> findResult1 = findInAllTable(op1);
+                    if(findResult1.at(1) == "overall") { //如果是一个全局变量
+                        addNewMipsCode("lw", "$v0", op1, "");
+                    }
+                    else {
+                        FuncParamTableItem fpti = funcParamTable[stringToInt(findResult1.at(2))];
+                        addNewMipsCode("lw", "$v0", fpci.addr, "");
+                    }
+                }
                 break;
             case qSaveAddr:
                 break;
             case qLoadAddr:
+                break;
+            case qReturn:
+                break;
+            case qCallFunc:
+                break;
+            case qPassParam:
                 break;
             default:
                 break;
@@ -270,8 +817,7 @@ void generateAll() {
     generateOverallConst();//生成全局常量
     generateOverallVar();//生成全局变量
     addNewMipsCode(".text", "", "", "");//声明text区
-    addNewMipsCode("li", "$fp", "0", "");//初始化fp
-    addNewMipsCode("li", "$sp", "0", "");//初始化sp
+    addNewMipsCode("move", "$fp", "$sp", "");//初始化sp
     addNewMipsCode("j", "main", "", "");//跳到main函数
 
 //    QuadCodeTableItem qcti = qCodeInstrs[qCodeTableScanner++];

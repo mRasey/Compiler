@@ -37,6 +37,7 @@ int printStringsPointer = 0;
 bool isAString = false;
 bool isAChar = false;
 bool isAlreadyRecordParamAddr = false;
+int lineNum = 0;
 
 /**
  * 初始化间隔符
@@ -218,6 +219,14 @@ string getStrQCode(QuadCodeInstr instr) {
         return "qJ";
     if(instr == qJFunc)
         return "qJFunc";
+    if(instr == qGetReturnInt)
+        return "qGetReturnInt";
+    if(instr == qGetReturnChar)
+        return "qGetReturnChar";
+    if(instr == qPutReturnInt)
+        return "qPutReturnInt";
+    if(instr == qPutReturnChar)
+        return "qGetReturnChar";
     if(instr == qGetArrayValue)
         return "qGetArrayValue";
     if(instr == qGetArrayIntValue)
@@ -236,6 +245,14 @@ string getStrQCode(QuadCodeInstr instr) {
         return "qReverse";
     if(instr == qPassParam)
         return "qPassParam";
+    if(instr == qPassIntParam)
+        return "qPassIntParam";
+    if(instr == qPassCharParam)
+        return "qPassCharParam";
+    if(instr == qGetIntParam)
+        return "qGetIntParam";
+    if(instr == qGetCharParam)
+        return "qGetCharParam";
     if(instr == qReturn)
         return "qReturn";
     if(instr == qScanf)
@@ -344,6 +361,14 @@ bool isKeyword(char* s) {
 bool isNumber(char* s) {
     for(int i = 0; i < strlen(s); i++) {
         if(s[i] < '0' || s[i] > '9')
+            return false;
+    }
+    return true;
+}
+
+bool isANumber(string s) {
+    for(int i = 0; i < s.length(); i++) {
+        if(s.at(i) < '0' || s.at(i) > '9')
             return false;
     }
     return true;
@@ -860,16 +885,16 @@ void dealOverallVar(ReservedWord recordType) {
             getNextSymbolAndType();
             if(symbolType == comma) { //如果是逗号表示当前一个变量声明完毕，继续当前行的分析
                 if(recordType == Int)
-                    emitQCode(qNewIntVar, tti->name, itoa(tti->intValue), "");//生成代码
+                    emitQCode(qNewIntVar, tti->name, "", "");//生成代码
                 else
-                    emitQCode(qNewCharVar, tti->name, ctoa(tti->charValue), "");//生成代码
+                    emitQCode(qNewCharVar, tti->name, "", "");//生成代码
                 continue;
             }
             else if(symbolType == semicolon) { //如果是分号表示当前行分析完毕，跳出循环
                 if(recordType == Int)
-                    emitQCode(qNewIntVar, tti->name, itoa(tti->intValue), "");//生成代码
+                    emitQCode(qNewIntVar, tti->name, "", "");//生成代码
                 else
-                    emitQCode(qNewCharVar, tti->name, ctoa(tti->charValue), "");//生成代码
+                    emitQCode(qNewCharVar, tti->name, "", "");//生成代码
                 break;
             }
             else if(symbolType == lBracket) { //如果是左中括号表示是一个数组
@@ -932,16 +957,16 @@ void dealInnerVar(TokenTableItem *tti, ReservedWord recordType) {
                 getNextSymbolAndType();
                 if (symbolType == comma) { //如果是逗号表示当前一个变量声明完毕，继续当前行的分析
                     if(recordType == Int)
-                        emitQCode(qNewIntVar, fpti->name, itoa(fpti->intValue), "");
+                        emitQCode(qNewIntVar, fpti->name, "", "");
                     else
-                        emitQCode(qNewCharVar, fpti->name, ctoa(fpti->charValue), "");
+                        emitQCode(qNewCharVar, fpti->name, "", "");
                     continue;
                 }
                 else if (symbolType == semicolon) { //如果是分号表示当前行分析完毕，跳出循环
                     if(recordType == Int)
-                        emitQCode(qNewIntVar, fpti->name, itoa(fpti->intValue), "");
+                        emitQCode(qNewIntVar, fpti->name, "", "");
                     else
-                        emitQCode(qNewCharVar, fpti->name, ctoa(fpti->charValue), "");
+                        emitQCode(qNewCharVar, fpti->name, "", "");
                     break;
                 }
                 else if (symbolType == lBracket) { //如果是左中括号表示是一个数组
@@ -1014,10 +1039,10 @@ void dealAssign() {
         else {
             FuncParamTableItem fpti = funcParamTable[index];
             if(fpti.type == Int) {
-                emitQCode(qAssignInt, dealExpression(), symbol, "");
+                emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
             }
             else if(fpti.type == Char) {
-                emitQCode(qAssignChar, dealExpression(), symbol, "");
+                emitQCode(qAssignChar, dealExpression(), recordSymbol, "");
             }
             else {
                 //todo 非法类型的容错处理
@@ -1045,17 +1070,17 @@ void dealPassParam(int index) {
         }
         while(symbolType != rParent) {
 //            dealExpression();
-            emitQCode(qAssignChar, dealExpression(), "P" + itoa(pIndex++), "");
+            emitQCode(qPassIntParam, dealExpression(), "P" + itoa(pIndex++), "");
 //            getNextSymbolAndType();//获取下一个参数 , or )
 
 //            if(symbolType == rParent)
 //                break;
 //            FuncParamTableItem fpti = funcParamTable[startIndex + pIndex];
 //            if(fpti.type == Int) {
-//                emitQCode(qAssignInt, symbol, "P" + itoa(pIndex++), "");
+//                emitQCode(qPassIntParam, symbol, "P" + itoa(pIndex++), "");
 //            }
 //            else if(fpti.type == Char) {
-//                emitQCode(qAssignChar, symbol, "P" + itoa(pIndex++), "");
+//                emitQCode(qPassCharParam, symbol, "P" + itoa(pIndex++), "");
 //            }
 //            else {
 //                todo 错误的参数类型的容错处理
@@ -1079,11 +1104,11 @@ string dealCallFunc(int index) {
 //    emitQCode(qJ, tti.name, "", "");
     if(tti.returnType == Int) {
         emitQCode(qNewIntVar, newTmpVar, "", "");
-        emitQCode(qAssignInt, "returnValue", newTmpVar, "");
+        emitQCode(qGetReturnInt, "returnValue", newTmpVar, "");
     }
     else if(tti.returnType == Char) {
         emitQCode(qNewIntVar, newTmpVar, "", "");
-        emitQCode(qAssignChar, "returnValue", newTmpVar, "");
+        emitQCode(qGetReturnChar, "returnValue", newTmpVar, "");
     }
     else {
         //todo 使用无返回值函数的容错处理
@@ -1394,10 +1419,10 @@ void dealForStep() {
             FuncParamTableItem fpti = funcParamTable[index];
             if(symbolType == assign) {
                 if(fpti.type == Int) {
-                    emitQCode(qAssignInt, dealExpression(), symbol, "");
+                    emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
                 }
                 else if(fpti.type == Char) {
-                    emitQCode(qAssignChar, dealExpression(), symbol, "");
+                    emitQCode(qAssignChar, dealExpression(), recordSymbol, "");
                 }
                 else {
                     //todo 非法的类型
@@ -1453,7 +1478,7 @@ void dealFor() {
 //    printf("this is a for loop\t\t\t%s\n", readIn);
     string label1 = getNextLabel();
     string label2 = getNextLabel();
-    getNextSymbolAndType();
+    getNextSymbolAndType();//(
     if(symbolType == lParent) {
         dealAssign();//处理赋值语句
         emitQCode(qLabel, label1 + ":", "", "");
@@ -1549,6 +1574,7 @@ void dealIf() {
  * 处理语句
  */
 void dealStatement() {
+    tmpVarPointer = 0;//每次进入新的一行就将临时变量号至零
     //已经获取首个token，不需要重新获取
 //    printf("this is a statement\t\t\t%s\n", readIn);
 
@@ -1691,6 +1717,7 @@ void dealStatement() {
         }
         else if(symbolType == Return) {
             getNextSymbolAndType();//(
+            TokenTableItem tti = tokenTable[findTokenInTable(currentDealFunc)];
             if(symbolType == lParent) {
 //                getNextSymbolAndType();//获取标识符
                 if(symbolType == rParent) { //如果是空表示无返回值
@@ -1699,9 +1726,19 @@ void dealStatement() {
                 }
                 else {
                     //todo 将返回值存储
-                    emitQCode(qAssignInt, dealExpression(), "returnValue", "");
-                    emitQCode(qJ, "end_" + currentDealFunc, "", "");//跳转到函数结尾
-                    getNextSymbolAndType();//;
+                    if(tti.returnType == Char) {
+                        emitQCode(qPutReturnChar, dealExpression(), "returnValue", "");
+                        emitQCode(qJ, "end_" + currentDealFunc, "", "");//跳转到函数结尾
+                        getNextSymbolAndType();//;
+                    }
+                    else if(tti.returnType == Int){
+                        emitQCode(qPutReturnInt, dealExpression(), "returnValue", "");
+                        emitQCode(qJ, "end_" + currentDealFunc, "", "");//跳转到函数结尾
+                        getNextSymbolAndType();//;
+                    }
+                    else {
+                        //todo 对无返回值函数使用return的容错处理
+                    }
                 }
             }
             else {
@@ -1783,10 +1820,10 @@ void dealParamlist(TokenTableItem *tti) {
                 if (symbolType == customObj) {
                     fpt->name = symbol;//记录参数名
                     if(symbolType == Int) {
-                        emitQCode(qAssignInt, "P" + itoa(pIndex++), fpt->name, "");
+                        emitQCode(qGetIntParam, "P" + itoa(pIndex++), fpt->name, "");
                     }
                     else {
-                        emitQCode(qAssignChar, "P" + itoa(pIndex++), fpt->name, "");
+                        emitQCode(qGetCharParam, "P" + itoa(pIndex++), fpt->name, "");
                     }
                     getNextSymbolAndType();
                     if (symbolType == comma) {
@@ -1898,9 +1935,9 @@ void grammaticalAnalysis() {
                     tti->obj = Var;
 
                     if(recordType == Int)
-                        emitQCode(qNewIntVar, tti->name, itoa(tti->intValue), "");
+                        emitQCode(qNewIntVar, tti->name, "", "");
                     else
-                        emitQCode(qNewCharVar, tti->name, ctoa(tti->charValue), "");
+                        emitQCode(qNewCharVar, tti->name, "", "");
 
                     dealOverallVar(recordType);//继续处理逗号后面的变量声明
                 }
@@ -1908,9 +1945,9 @@ void grammaticalAnalysis() {
                     tti->obj = Var;
 
                     if(recordType == Int)
-                        emitQCode(qNewIntVar, tti->name, itoa(tti->intValue), "");
+                        emitQCode(qNewIntVar, tti->name, "", "");
                     else
-                        emitQCode(qNewCharVar, tti->name, ctoa(tti->charValue), "");
+                        emitQCode(qNewCharVar, tti->name, "", "");
 
                 }
                 else {
