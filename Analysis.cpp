@@ -1135,18 +1135,26 @@ string dealFactor() {
                 string newTmpVar = getNextTmpVar();
                 if(isNumber(symbol)) {
                     //todo 计算数组下标相应的值
-                    if(tti.type == Int)
+                    if(tti.type == Int) {
+//                        emitQCode(qNewIntVar, newTmpVar, "", "");
                         emitQCode(qGetArrayIntValue, tti.name, symbol, newTmpVar);
-                    else
+                    }
+                    else {
+//                        emitQCode(qNewCharVar, newTmpVar, "", "");
                         emitQCode(qGetArrayCharValue, tti.name, symbol, newTmpVar);
+                    }
                     getNextSymbolAndType();//获得]
                     return newTmpVar;
                 }
                 else {
-                    if(tti.type == Int)
+                    if(tti.type == Int) {
+//                        emitQCode(qNewIntVar, newTmpVar, "", "");
                         emitQCode(qGetArrayIntValue, tti.name, dealExpression(), newTmpVar);
-                    else
+                    }
+                    else {
+//                        emitQCode(qNewCharVar, newTmpVar, "", "");
                         emitQCode(qGetArrayCharValue, tti.name, dealExpression(), newTmpVar);
+                    }
                     return newTmpVar;
                 }
             }
@@ -1354,7 +1362,7 @@ string dealExpression() {
  * 处理条件语句，读到)或;为止
  * @return 返回条件语句的结果，如果为假返回0，否则返回1
  */
-void dealCondition(string label1) {
+void dealCondition(string label1, string op) {
 //    printf("this is a condition\t\t\t%s\n", readIn);
     string op1 = dealExpression();//处理第一个表达式并获取结果
 //    getNextSymbolAndType();
@@ -1362,20 +1370,56 @@ void dealCondition(string label1) {
             || symbolType == smallAndEql || symbolType == eql || symbolType == notEql) {
 //        string recordSymbol = symbol;//记录比较符
 //        op2 = dealExpression();//处理第二个表达式并获取结果
-        if(symbolType == big)
-            emitQCode(qJle, op1, dealExpression(), label1);
-        else if(symbolType == small)
-            emitQCode(qJge, op1, dealExpression(), label1);
-        else if(symbolType == bigAndEql)
-            emitQCode(qJl, op1, dealExpression(), label1);
-        else if(symbolType == smallAndEql)
-            emitQCode(qJg, op1, dealExpression(), label1);
-        else if(symbolType == eql)
-            emitQCode(qJne, op1, dealExpression(), label1);
-        else if(symbolType == notEql)
-            emitQCode(qJe, op1, dealExpression(), label1);
-        else {
+        if(op == "if") {
+            if(symbolType == big)
+                emitQCode(qJle, op1, dealExpression(), label1);
+            else if(symbolType == small)
+                emitQCode(qJge, op1, dealExpression(), label1);
+            else if(symbolType == bigAndEql)
+                emitQCode(qJl, op1, dealExpression(), label1);
+            else if(symbolType == smallAndEql)
+                emitQCode(qJg, op1, dealExpression(), label1);
+            else if(symbolType == eql)
+                emitQCode(qJne, op1, dealExpression(), label1);
+            else if(symbolType == notEql)
+                emitQCode(qJe, op1, dealExpression(), label1);
+            else {
 
+            }
+        }
+        else if(op == "for") {
+            if(symbolType == big)
+                emitQCode(qJle, op1, dealExpression(), label1);
+            else if(symbolType == small)
+                emitQCode(qJge, op1, dealExpression(), label1);
+            else if(symbolType == bigAndEql)
+                emitQCode(qJl, op1, dealExpression(), label1);
+            else if(symbolType == smallAndEql)
+                emitQCode(qJg, op1, dealExpression(), label1);
+            else if(symbolType == eql)
+                emitQCode(qJne, op1, dealExpression(), label1);
+            else if(symbolType == notEql)
+                emitQCode(qJe, op1, dealExpression(), label1);
+            else {
+
+            }
+        }
+        else if(op == "doWhile") {
+            if(symbolType == big)
+                emitQCode(qJg, op1, dealExpression(), label1);
+            else if(symbolType == small)
+                emitQCode(qJl, op1, dealExpression(), label1);
+            else if(symbolType == bigAndEql)
+                emitQCode(qJge, op1, dealExpression(), label1);
+            else if(symbolType == smallAndEql)
+                emitQCode(qJle, op1, dealExpression(), label1);
+            else if(symbolType == eql)
+                emitQCode(qJe, op1, dealExpression(), label1);
+            else if(symbolType == notEql)
+                emitQCode(qJne, op1, dealExpression(), label1);
+            else {
+
+            }
         }
     }
     else if(symbolType == rParent) { //如果读取到右括号表明条件只有一个表达式
@@ -1482,7 +1526,7 @@ void dealFor() {
     if(symbolType == lParent) {
         dealAssign();//处理赋值语句
         emitQCode(qLabel, label1 + ":", "", "");
-        dealCondition(label2);//处理条件语句
+        dealCondition(label2, "for");//处理条件语句
         dealForStep();//处理for循环跳转步数语句
     }
     else {
@@ -1523,7 +1567,7 @@ void dealDoWhile() {
     if(symbolType == While) {
         getNextSymbolAndType();//(
         if(symbolType == lParent) {
-            dealCondition(label1);
+            dealCondition(label1, "doWhile");
             getNextSymbolAndType();//获取分号;
         }
         else {
@@ -1541,7 +1585,7 @@ void dealIf() {
     string label2 = getNextLabel();
     getNextSymbolAndType();//(
     if(symbolType == lParent) { //如果是左括号进入条件处理语句
-        dealCondition(label1);//在处理条件语句的地方生成标签
+        dealCondition(label1, "if");//在处理条件语句的地方生成标签
         getNextSymbolAndType();//{
         if(symbolType == lBrace) { //如果读到花括号进入语句列处理
             dealStatements();
@@ -1551,6 +1595,8 @@ void dealIf() {
         }
         else {
             dealStatement(); //进入语句处理
+            if(symbolType != semicolon)
+                getNextSymbolAndType();
         }
         getNextSymbolAndType();//else 或者下一个语句的开始
         if(symbolType == Else) { //如果有else块则开始处理else的语句
@@ -1675,6 +1721,7 @@ void dealStatement() {
                         emitQCode(qPrintfInt, dealResult, "", "");
                     }
                 } while(symbolType == comma);
+//                getNextSymbolAndType();//;
             }
             else {
                 //todo 输出语句缺少括号的容错处理
@@ -1721,19 +1768,19 @@ void dealStatement() {
             if(symbolType == lParent) {
 //                getNextSymbolAndType();//获取标识符
                 if(symbolType == rParent) { //如果是空表示无返回值
-                    emitQCode(qJ, "end_" + currentDealFunc, "", "");//跳转到函数结尾
+                    emitQCode(qJ, "$end_" + currentDealFunc, "", "");//跳转到函数结尾
                     getNextSymbolAndType();//;
                 }
                 else {
                     //todo 将返回值存储
                     if(tti.returnType == Char) {
                         emitQCode(qPutReturnChar, dealExpression(), "returnValue", "");
-                        emitQCode(qJ, "end_" + currentDealFunc, "", "");//跳转到函数结尾
+                        emitQCode(qJ, "$end_" + currentDealFunc, "", "");//跳转到函数结尾
                         getNextSymbolAndType();//;
                     }
                     else if(tti.returnType == Int){
                         emitQCode(qPutReturnInt, dealExpression(), "returnValue", "");
-                        emitQCode(qJ, "end_" + currentDealFunc, "", "");//跳转到函数结尾
+                        emitQCode(qJ, "$end_" + currentDealFunc, "", "");//跳转到函数结尾
                         getNextSymbolAndType();//;
                     }
                     else {
@@ -1767,7 +1814,7 @@ void dealStatements() {
 //        getNextSymbolAndType();
         if (symbolType == If) { //进入if...else...循环
             dealIf();
-            getNextSymbolAndType();
+//            getNextSymbolAndType();
         }
         else if (symbolType == For) { //进入for循环
             dealFor();
@@ -1874,7 +1921,7 @@ void dealFunc(TokenTableItem *tti) {
     else {
         //todo 函数定义缺少花括号的容错处理
     }
-    emitQCode(qFuncEndLabel, getFuncLabel("end_" + tti->name), "", "");
+    emitQCode(qFuncEndLabel, getFuncLabel("$end_" + tti->name), "", "");
 }
 
 /**

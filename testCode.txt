@@ -1,0 +1,27 @@
+int foo(int a, int b)
+{
+  if(a > b)
+    printf("big\n");
+  if(a < b)
+    printf("less\n");
+  if(a >= b)
+    printf("big or equal\n");
+  if(a <= b)
+    printf("less or equal\n");
+  if(a != b)
+    printf("not equal\n");
+  if(a == b)
+    printf("equal\n");
+  return (233);
+}
+
+void foo2(int a, int b) {
+    if(a > b)
+        printf("big\n");
+      else
+        printf("small\n");
+}
+
+void main() {
+    foo2(1,2);
+}

@@ -22,6 +22,6 @@ int main() {
 //    printf("***********start***********\n");
 //    printAllSymbol();
 //    printf("************end************\n");
-//    generateAll();
+    generateAll();
     return 0;
 }

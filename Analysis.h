@@ -218,7 +218,7 @@ string dealCallFunc(int index) ;
 string dealFactor() ;
 string dealTerm() ;
 string dealExpression() ;
-void dealCondition(string label);
+void dealCondition(string label, string op);
 void dealForStep() ;
 void dealFor() ;
 void dealDoWhile() ;
