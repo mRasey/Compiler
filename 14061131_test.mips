@@ -1,0 +1,79 @@
+.data                                   
+.text                                   
+move      $fp       $sp                 
+j         main                          
+foo:                                    
+sw        $fp       -4($sp)             
+move      $fp       $sp                 
+subu      $sp       $sp       32        
+sw        $ra       -8($fp)             
+sw        $a0       -12($fp)            
+sw        $a1       -16($fp)            
+lw        $t8       -12($fp)            
+lw        $t9       -16($fp)            
+add       $t9       $t8       $t9       
+sw        $t9       4($sp)              
+lw        $v0       4($sp)              
+j         $end_foo                      
+$end_foo:                               
+lw        $ra       -8($fp)             
+move      $sp       $fp                 
+lw        $fp       -4($fp)             
+jr        $ra                           
+foo2:                                   
+sw        $fp       -4($sp)             
+move      $fp       $sp                 
+subu      $sp       $sp       24        
+sw        $ra       -8($fp)             
+sw        $a0       -12($fp)            
+sw        $a1       -16($fp)            
+lw        $t8       -12($fp)            
+lw        $t9       -16($fp)            
+sub       $t9       $t8       $t9       
+sw        $t9       4($sp)              
+lw        $v0       4($sp)              
+j         $end_foo2                     
+$end_foo2:                              
+lw        $ra       -8($fp)             
+move      $sp       $fp                 
+lw        $fp       -4($fp)             
+jr        $ra                           
+foo3:                                   
+sw        $fp       -4($sp)             
+move      $fp       $sp                 
+subu      $sp       $sp       24        
+sw        $ra       -8($fp)             
+sw        $a0       -12($fp)            
+sw        $a1       -16($fp)            
+lw        $t8       -12($fp)            
+lw        $t9       -16($fp)            
+sub       $t9       $t8       $t9       
+sw        $t9       4($sp)              
+lw        $v0       4($sp)              
+j         $end_foo3                     
+$end_foo3:                              
+lw        $ra       -8($fp)             
+move      $sp       $fp                 
+lw        $fp       -4($fp)             
+jr        $ra                           
+main:                                   
+sw        $fp       -4($sp)             
+move      $fp       $sp                 
+subu      $sp       $sp       16        
+sw        $ra       -8($fp)             
+li        $a0       1                   
+li        $a1       2                   
+jal       foo                           
+sw        $v0       4($sp)              
+li        $a0       3                   
+li        $a1       4                   
+jal       foo2                          
+sw        $v0       8($sp)              
+lw        $a0       4($sp)              
+lw        $a1       8($sp)              
+jal       foo3                          
+sw        $v0       12($sp)             
+lw        $a0       12($sp)             
+li        $v0       1                   
+syscall                                 
+$end_main:                              

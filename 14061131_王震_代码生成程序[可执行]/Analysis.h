@@ -150,7 +150,6 @@ typedef struct {
     int localVarAccount;//记录函数局部变量的个数
     char content[1024];//如果是字符串则记录内容，其他为’\0’
     int arraySize = 1;//如果是数组则记录数组大小，其他为1
-    int maxTmpVar = 0;//如果是函数则记录最多临时变量的数目
 } TokenTableItem;
 
 //代码表项
@@ -179,7 +178,6 @@ typedef struct {
     bool isArray;//记录是否是数组
     int arraySize;//如果是数组则记录数组的大小
     string addr;//相对于基地址的地址
-    string paramTmpName;
 } FuncParamTableItem;
 
 string getStrQCode(QuadCodeInstr instr) ;

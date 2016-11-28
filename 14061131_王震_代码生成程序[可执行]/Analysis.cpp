@@ -38,7 +38,6 @@ bool isAString = false;
 bool isAChar = false;
 bool isAlreadyRecordParamAddr = false;
 int lineNum = 0;
-int maxTmpVarIndex = 0;
 
 /**
  * 初始化间隔符
@@ -425,11 +424,7 @@ string getNextLabel() {
  * @return
  */
 string getNextTmpVar() {
-    string newTmpVar = "#" + itoa(tmpVarPointer++);
-    TokenTableItem *tti = &tokenTable[std::atoi(findInAllTable(currentDealFunc).at(2).c_str())];
-    if(tti->maxTmpVar < tmpVarPointer)
-        tti->maxTmpVar = tmpVarPointer;
-    return newTmpVar;
+    return "#" + itoa(tmpVarPointer++);
 }
 
 /**
@@ -1075,9 +1070,7 @@ void dealPassParam(int index) {
         }
         while(symbolType != rParent) {
 //            dealExpression();
-            FuncParamTableItem *fpti = &funcParamTable[startIndex++];
-            fpti->paramTmpName = dealExpression();
-//            emitQCode(qPassIntParam, dealExpression(), "P" + itoa(pIndex++), "");
+            emitQCode(qPassIntParam, dealExpression(), "P" + itoa(pIndex++), "");
 //            getNextSymbolAndType();//获取下一个参数 , or )
 
 //            if(symbolType == rParent)
@@ -1106,11 +1099,6 @@ void dealPassParam(int index) {
 string dealCallFunc(int index) {
     TokenTableItem tti = tokenTable[index];
     dealPassParam(index);//处理传参
-    for(int i = 0; i < tti.paramAccount; i++) {
-        FuncParamTableItem fpti = funcParamTable[tti.paramAddr + i];
-        emitQCode(qPassIntParam, fpti.paramTmpName, "P" + itoa(i), "");
-
-    }
     emitQCode(qJFunc, tti.name, "", "");
     string newTmpVar = getNextTmpVar();
 //    emitQCode(qJ, tti.name, "", "");

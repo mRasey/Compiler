@@ -31,6 +31,8 @@ iomanip
 -
 
 /Users/billy/Documents/Github/Compiler/Generate.cpp
+fstream
+-
 Generate.h
 /Users/billy/Documents/Github/Compiler/Generate.h
 Analysis.h

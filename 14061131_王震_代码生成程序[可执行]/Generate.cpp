@@ -91,12 +91,12 @@ void printAllMipsCode() {
  */
 string getAddrFromShape(string s) {
     int index =  std::atoi(s.substr(1, s.length()).c_str());
-    return  itoa((index + 1) * 4) + "($sp)";
+    return  "-" + itoa((index + 1) * 4) + "($sp)";
 }
 
 string getTmpVarAddr(string tmpVar) {
     int index = std::atoi(tmpVar.substr(1, tmpVar.length()).c_str());//去掉#并转换成数字
-    return itoa((4) * (index + 1)) + "($sp)";
+    return itoa((-4) * (index + 1)) + "($sp)";
 }
 
 /**
@@ -342,7 +342,6 @@ void generateOverallVar() {
  * 生成函数
  */
 void generateFunc(QuadCodeTableItem qcti) {
-    string preDealFunc = currentDealFunc;//记录之前正在处理的函数
     currentDealFunc = qcti.operand1.substr(0, qcti.operand1.length() - 1);//函数名标签
     addNewMipsCode(qcti.operand1, "", "", "");//添加函数标签
     int index = findTokenInTable(currentDealFunc);//找到函数名在符号表中的位置
@@ -380,8 +379,6 @@ void generateFunc(QuadCodeTableItem qcti) {
             shift = shift + 4 * fpti.arraySize;
         }
     }
-    int maxTmpVarIndex = tokenTable[stringToInt(findInAllTable(preDealFunc).at(2).c_str())].maxTmpVar;
-    shift += (maxTmpVarIndex + 1) * 4;
     addNewMipsCode("sw", "$fp", "-4($sp)", "");//保存当前的fp指针
     addNewMipsCode("move", "$fp", "$sp", "");//将fp指针挪到sp的位置
     addNewMipsCode("subu", "$sp", "$sp", itoa(shift));//申请局部变量的空间
@@ -476,7 +473,7 @@ void generateFunc(QuadCodeTableItem qcti) {
                 getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
                 addNewMipsCode("add", "$t9", "$t8", "$t9");//计算
                 tIndex = std::atoi(op3.substr(1, op3.length()).c_str());
-                addNewMipsCode("sw", "$t9", itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
+                addNewMipsCode("sw", "$t9", "-" + itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
                 break;
             }
             case qSub: {
@@ -484,7 +481,7 @@ void generateFunc(QuadCodeTableItem qcti) {
                 getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
                 addNewMipsCode("sub", "$t9", "$t8", "$t9");//计算
                 tIndex = std::atoi(op3.substr(1, op3.length()).c_str());
-                addNewMipsCode("sw", "$t9", itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
+                addNewMipsCode("sw", "$t9", "-" + itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
                 break;
             }
             case qMul: {
@@ -492,7 +489,7 @@ void generateFunc(QuadCodeTableItem qcti) {
                 getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
                 addNewMipsCode("mul", "$t9", "$t8", "$t9");//计算
                 tIndex = std::atoi(op3.substr(1, op3.length()).c_str());
-                addNewMipsCode("sw", "$t9", itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
+                addNewMipsCode("sw", "$t9", "-" + itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
                 break;
             }
             case qDiv: {
@@ -500,7 +497,7 @@ void generateFunc(QuadCodeTableItem qcti) {
                 getAddressAndAddMipsInstrByOpKind(op2, "$t9");//将操作数2加载至寄存器
                 addNewMipsCode("div", "$t9", "$t8", "$t9");//计算
                 tIndex = std::atoi(op3.substr(1, op3.length()).c_str());
-                addNewMipsCode("sw", "$t9", itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
+                addNewMipsCode("sw", "$t9", "-" + itoa((tIndex + 1) * 4) + "($sp)", "");//保存结果至内存
                 break;
             }
             case qJl: {
@@ -840,7 +837,7 @@ void generateAll() {
  */
 void printToMipsFile() {
     ofstream outFile;
-    outFile.open("/Users/billy/Documents/Github/Compiler/14061131_test.mips");
+    outFile.open("14061131_test.mips");
     for(int i = 0; i < codeTablePointer; i++) {
         CodeTableItem *cti = &codeTable[i];
         outFile << left << setw(10) << cti->name;
