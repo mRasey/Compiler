@@ -268,6 +268,8 @@ string getStrQCode(QuadCodeInstr instr) {
         return "qPrintfString";
     if(instr == qPrintfInt)
         return "qPrintfInt";
+    if(instr == qPrintfChar)
+        return "qPrintfChar";
     if(instr == qSaveAddr)
         return "qSaveAddr";
     if(instr == qLoadAddr)
@@ -360,7 +362,8 @@ bool isKeyword(char* s) {
  * @return 如果是数字返回true，否则返回false
  */
 bool isNumber(char* s) {
-    for(int i = 0; i < strlen(s); i++) {
+    int i;
+    for(i = 0; i < strlen(s); i++) {
         if(s[i] < '0' || s[i] > '9')
             return false;
     }
@@ -368,7 +371,10 @@ bool isNumber(char* s) {
 }
 
 bool isANumber(string s) {
-    for(int i = 0; i < s.length(); i++) {
+    int i = 0;
+    if(s.at(0) == '+' || s.at(0) == '-')
+        i = 1;
+    for(i = i; i < s.length(); i++) {
         if(s.at(i) < '0' || s.at(i) > '9')
             return false;
     }
@@ -385,6 +391,8 @@ bool isChar(char* s) {
         return false;
     return s[0] == '+'
            || s[0] == '-'
+           || s[0] == '*'
+           || s[0] == '/'
            || s[0] == '_'
            || ('0' <= s[0] && s[0] <= '9')
            || ('A' <= s[0] && s[0] <= 'z');
@@ -735,15 +743,32 @@ void dealOverallConst() {
             do {
                 tti->type = Int;//记录类型
                 tti->obj = Const;//记录种类
-                getNextSymbol();//读取常量名
-                tti->name = symbol;
-//                strcpy(tti->name.c_str(), symbol);//记录变量名
+                getNextSymbolAndType();//读取常量名
+                tti->name = symbol;//记录变量名
                 //todo 重定义的容错处理
-                getNextSymbol();//读取=号
+                getNextSymbolAndType();//读取=号
                 //todo 容错
-                getNextSymbol();//读取常量值
+                getNextSymbolAndType();//读取常量值
                 if (isNumber(symbol))
                     tti->intValue = atoi(symbol);//记录常量值
+                else if(symbolType == sub) {
+                    getNextSymbolAndType();
+                    if(isNumber(symbol)) {
+                        tti->intValue = -1 * atoi(symbol);
+                    }
+                    else {
+                        //todo 非法数字的容错处理
+                    }
+                }
+                else if(symbolType == Plus) {
+                    getNextSymbolAndType();
+                    if(isNumber(symbol)) {
+                        tti->intValue = atoi(symbol);
+                    }
+                    else {
+                        //todo 非法数字的容错处理
+                    }
+                }
                 else {
                     printf("err: not a number");
                     tti->intValue = 0;//否则报错并赋值为0
@@ -757,13 +782,13 @@ void dealOverallConst() {
             do {
                 tti->type = Char;//记录类型
                 tti->obj = Const;//记录种类
-                getNextSymbol();//读取常量名
+                getNextSymbolAndType();//读取常量名
                 tti->name = symbol;
 //                strcpy(tti->name, symbol);//记录常量名
                 //todo 重定义的容错处理
-                getNextSymbol();//读取=号
+                getNextSymbolAndType();//读取=号
                 //todo 容错
-                getNextSymbol();//读取常量值
+                getNextSymbolAndType();//读取常量值
                 if (isChar(symbol))
                     tti->charValue = symbol[0];//将字符串转为单个字符
                 else {
@@ -807,9 +832,27 @@ void dealInnerConst(TokenTableItem *tti) {
 //                    strcpy(fpti->name, symbol);//记录变量名
                     getNextSymbolAndType();//读取=号
                     //todo 容错
-                    getNextSymbol();//读取常量值
+                    getNextSymbolAndType();//读取常量值
                     if (isNumber(symbol)) {
                         fpti->intValue = atoi(symbol);//记录常量值
+                    }
+                    else if(symbolType == sub) {
+                        getNextSymbolAndType();
+                        if(isNumber(symbol)) {
+                            fpti->intValue = -1 * atoi(symbol);
+                        }
+                        else {
+                            //todo 非法数字的容错处理
+                        }
+                    }
+                    else if(symbolType == Plus) {
+                        getNextSymbolAndType();
+                        if(isNumber(symbol)) {
+                            fpti->intValue = atoi(symbol);
+                        }
+                        else {
+                            //todo 非法数字的容错处理
+                        }
                     }
                     else {
                         printf("err: not a number");
@@ -847,7 +890,7 @@ void dealInnerConst(TokenTableItem *tti) {
 
                     }
                     else {
-                        printf("err: not a char");
+                        printf("err:in dealInnerConst not a char\n");
                         //todo 只取第一个合法字符
                         fpti->charValue = symbol[0];//否则报错并只取第一个字符
                     }
@@ -1115,11 +1158,11 @@ string dealCallFunc(int index) {
     string newTmpVar = getNextTmpVar();
 //    emitQCode(qJ, tti.name, "", "");
     if(tti.returnType == Int) {
-        emitQCode(qNewIntVar, newTmpVar, "", "");
+//        emitQCode(qNewIntVar, newTmpVar, "", "");
         emitQCode(qGetReturnInt, "returnValue", newTmpVar, "");
     }
     else if(tti.returnType == Char) {
-        emitQCode(qNewIntVar, newTmpVar, "", "");
+//        emitQCode(qNewIntVar, newTmpVar, "", "");
         emitQCode(qGetReturnChar, "returnValue", newTmpVar, "");
     }
     else {
@@ -1134,8 +1177,19 @@ string dealCallFunc(int index) {
  * @return 返回因子的值
  */
 string dealFactor() {
+    isAChar = false;
 //    printf("this is a factor\t\t\t%s\n", readIn);
     //已经获得运算符的后一个token
+    if(symbolType == aChar) { //如果是一个字符则直接返回字符的ascii码
+        isAChar = true;
+        return itoa(symbol[0] - '\0');
+    }
+    else if(symbolType == aString) {
+        isAString = true;
+        string result = symbol;
+//        getNextSymbolAndType();//, or )
+        return result;
+    }
     vector<string> findResult = findInAllTable(symbol);
     if(findResult.at(0) == "true") {
         int index = std::atoi(findResult.at(2).c_str());
@@ -1143,32 +1197,28 @@ string dealFactor() {
             TokenTableItem tti = tokenTable[index];
             if(tti.isArray) { //如果是数组型
                 getNextSymbolAndType();//[
-                getNextSymbolAndType();//
+//                getNextSymbolAndType();//中括号里的值
                 string newTmpVar = getNextTmpVar();
-                if(isNumber(symbol)) {
+//                if(isNumber(symbol)) {
                     //todo 计算数组下标相应的值
                     if(tti.type == Int) {
-//                        emitQCode(qNewIntVar, newTmpVar, "", "");
-                        emitQCode(qGetArrayIntValue, tti.name, symbol, newTmpVar);
-                    }
-                    else {
-//                        emitQCode(qNewCharVar, newTmpVar, "", "");
-                        emitQCode(qGetArrayCharValue, tti.name, symbol, newTmpVar);
-                    }
-                    getNextSymbolAndType();//获得]
-                    return newTmpVar;
-                }
-                else {
-                    if(tti.type == Int) {
-//                        emitQCode(qNewIntVar, newTmpVar, "", "");
                         emitQCode(qGetArrayIntValue, tti.name, dealExpression(), newTmpVar);
                     }
                     else {
-//                        emitQCode(qNewCharVar, newTmpVar, "", "");
                         emitQCode(qGetArrayCharValue, tti.name, dealExpression(), newTmpVar);
                     }
+//                    getNextSymbolAndType();//获得]
                     return newTmpVar;
-                }
+//                }
+//                else {
+//                    if(tti.type == Int) {
+//                        emitQCode(qGetArrayIntValue, tti.name, dealExpression(), newTmpVar);
+//                    }
+//                    else {
+//                        emitQCode(qGetArrayCharValue, tti.name, dealExpression(), newTmpVar);
+//                    }
+//                    return newTmpVar;
+//                }
             }
             else if(tti.obj == Func) { //如果是一个函数
 //                string newTmpVar = getNextTmpVar();
@@ -1202,25 +1252,25 @@ string dealFactor() {
             FuncParamTableItem fpti = funcParamTable[index];
             if(fpti.isArray) { //如果是数组型
                 getNextSymbolAndType();//[
-                getNextSymbolAndType();//
+//                getNextSymbolAndType();//
                 string newTmpVar = getNextTmpVar();
-                if(isNumber(symbol)) {
+//                if(isNumber(symbol)) {
                     //todo 计算数组下标相应的值
-                    if(fpti.type == Int)
-                        emitQCode(qGetArrayIntValue, fpti.name, symbol, newTmpVar);
-                    else
-                        emitQCode(qGetArrayCharValue, fpti.name, symbol, newTmpVar);
-                    getNextSymbolAndType();//获得]
-                    return newTmpVar;
-                }
-                else {
                     if(fpti.type == Int)
                         emitQCode(qGetArrayIntValue, fpti.name, dealExpression(), newTmpVar);
                     else
                         emitQCode(qGetArrayCharValue, fpti.name, dealExpression(), newTmpVar);
+//                    getNextSymbolAndType();//获得]
                     return newTmpVar;
+//                }
+//                else {
+//                    if(fpti.type == Int)
+//                        emitQCode(qGetArrayIntValue, fpti.name, dealExpression(), newTmpVar);
+//                    else
+//                        emitQCode(qGetArrayCharValue, fpti.name, dealExpression(), newTmpVar);
+//                    return newTmpVar;
 //                    return dealExpression();
-                }
+//                }
             }
             else { //非数组及函数的标识符
                 if(fpti.type == Int) { //如果是int型变量返回int值
@@ -1238,6 +1288,31 @@ string dealFactor() {
                     printf("unexpected error in dealFactor\n");
                 }
             }
+        }
+    }
+    else if(symbolType == Plus || symbolType == sub) {
+        if(symbolType == sub) {
+            getNextSymbolAndType();
+            if(isANumber(symbol)) {
+                stringstream ss;
+                ss << symbol;
+                return "-" + ss.str();
+            }
+            else {
+                //todo 非法的连续加减号的容错处理
+            }
+        }
+        else if(symbolType == Plus) {
+            getNextSymbolAndType();
+            if(isANumber(symbol)) {
+                return symbol;
+            }
+            else {
+                //todo 非法的连续加减号的容错处理
+            }
+        }
+        else {
+            //todo 非法的连续加减号的容错处理
         }
     }
     else if(isNumber(symbol)) { //如果是一个数字
@@ -1304,17 +1379,11 @@ string dealExpression() {
     getNextSymbolAndType();//间隔符的后一个token
     string newTmpVar;
     string term1;
-    if(symbolType == aString) {
-        isAString = true;
-        string result = symbol;
-        getNextSymbolAndType();//, or )
-        return result;
-    }
-    else if(symbolType == Plus || symbolType == sub) {
+    if(symbolType == Plus || symbolType == sub) {
         if(symbolType == sub) { //取反
             getNextSymbolAndType();
             newTmpVar = getNextTmpVar();
-            emitQCode(qNewIntVar, newTmpVar, "", "");
+//            emitQCode(qNewIntVar, newTmpVar, "", "");
             emitQCode(qReverse, dealTerm(), newTmpVar, "");
             term1 = newTmpVar;
         }
@@ -1332,14 +1401,14 @@ string dealExpression() {
             if(symbolType == Plus) {
                 getNextSymbolAndType();
                 newTmpVar = getNextTmpVar();
-                emitQCode(qNewIntVar, newTmpVar, "", "");
+//                emitQCode(qNewIntVar, newTmpVar, "", "");
                 emitQCode(qPlus, term1, dealTerm(), newTmpVar);
                 term1 = newTmpVar;
             }
             else {
                 getNextSymbolAndType();
                 newTmpVar = getNextTmpVar();
-                emitQCode(qNewIntVar, newTmpVar, "", "");
+//                emitQCode(qNewIntVar, newTmpVar, "", "");
                 emitQCode(qSub, term1, dealTerm(), newTmpVar);
                 term1 = newTmpVar;
             }
@@ -1435,7 +1504,18 @@ void dealCondition(string label1, string op) {
         }
     }
     else if(symbolType == rParent) { //如果读取到右括号表明条件只有一个表达式
-        emitQCode(qJg, op1, "0", label1);
+        if(op == "if") {
+            emitQCode(qJle, op1, "0", label1);
+        }
+        else if(op == "for") {
+            emitQCode(qJle, op1, "0", label1);
+        }
+        else if(op == "doWhile") {
+            emitQCode(qJg, op1, "0", label1);
+        }
+        else {
+            //todo 非法的比较操作的容错处理
+        }
     }
     else {
         //todo 非法比较符的容错处理
@@ -1580,7 +1660,7 @@ void dealDoWhile() {
         getNextSymbolAndType();//(
         if(symbolType == lParent) {
             dealCondition(label1, "doWhile");
-            getNextSymbolAndType();//获取分号;
+//            getNextSymbolAndType();//获取分号;
         }
         else {
             //todo while后缺少左括号的容错处理
@@ -1724,10 +1804,15 @@ void dealStatement() {
                 do {
                     string dealResult = dealExpression();
                     if(isAString || isAChar) {
-                        printStrings[printStringsPointer] = dealResult;//记录所有string
-                        emitQCode(qPrintfString, "str_" + itoa(printStringsPointer++), "", "");
-                        isAString = false;
-                        isAChar = false;
+                        if(isAString) {
+                            printStrings[printStringsPointer] = dealResult;//记录所有string
+                            emitQCode(qPrintfString, "str_" + itoa(printStringsPointer++), "", "");
+                            isAString = false;
+                        }
+                        else if(isAChar) {
+                            emitQCode(qPrintfChar, dealResult, "", "");
+                            isAChar = false;
+                        }
                     }
                     else {
                         emitQCode(qPrintfInt, dealResult, "", "");
@@ -1798,6 +1883,14 @@ void dealStatement() {
                     else {
                         //todo 对无返回值函数使用return的容错处理
                     }
+                }
+            }
+            else if(symbolType == semicolon) {
+                if(tti.returnType == Void) {
+                    emitQCode(qJ, "$end_" + currentDealFunc, "", "");//跳转到函数结尾
+                }
+                else {
+                    //todo 非void函数缺少返回值的容错处理
                 }
             }
             else {

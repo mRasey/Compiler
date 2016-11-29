@@ -117,6 +117,7 @@ typedef enum {
     qPrintf,//输出
     qPrintfString,//输出
     qPrintfInt,//输出
+    qPrintfChar,//输出
     qSaveAddr,//存入内存
     qLoadAddr,//加载至寄存器
 } QuadCodeInstr;

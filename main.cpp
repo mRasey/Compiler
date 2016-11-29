@@ -13,8 +13,9 @@ extern FILE* in;
  */
 int main() {
     init();
-//    in = fopen("/Users/billy/Documents/Github/Compiler/14061131_test.txt", "r");
-    in = fopen("/Users/billy/Documents/Github/Compiler/testCode.txt", "r");
+//    in = fopen("/Users/billy/Documents/Github/Compiler/test/14061131_test.txt", "r");
+//    in = fopen("/Users/billy/Documents/Github/Compiler/test/testCode.txt", "r");
+    in = fopen("/Users/billy/Documents/Github/Compiler/test/publictest.txt", "r");
     grammaticalAnalysis();
     printAllQCode();
     printTokenTable();
