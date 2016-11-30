@@ -33,13 +33,15 @@ void foo2()
   {
     printf(i);
     i = i - 1;
-  } while(i > 0);
+  } while(i > 0)
 }
 
 int foo3(int i)
 {
-  if(i == 10)
+  printf(i);
+  if(i == 10) {
     return (i);
+    }
   return (i + foo3(i+1));
 }
 
@@ -64,8 +66,15 @@ int foo6()
   int a[2];
   a[0] = 1;
   a[1] = 2;
-  a[2] = a[0] * (a[1] + foo5()) / foo(1, 2);
+  a[2] = a[0] * (a[1] + foo5()) * foo(1, 2);
   return (a[2]);
+}
+
+int fibonacci (int n){
+    if (n == 0) return (1);
+    if(n==1) return (1);
+    if (n == 2) return (2);
+    if(n!=2) return (fibonacci(n-1)+fibonacci(n-2));
 }
 
 void main()
@@ -73,9 +82,15 @@ void main()
   int a;
   char b;
   scanf(b);
+  printf(b);
   a = foo(2, 3);
   foo2();
+  foo3(1);
   foo4(1, 2);
-  foo6();
+  printf("foo6(): ", foo6());
+  printf("\n");
+  printf("fibonacci: ", fibonacci(6));
   return;
 }
+
+

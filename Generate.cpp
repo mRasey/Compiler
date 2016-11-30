@@ -107,6 +107,7 @@ void getOverallArrayShiftAndAddMips(string arrayAddr, string op2, string reg1, s
     if(isANumber(op2)) { //如果是数字则直接
         int shift = std::atoi(op2.c_str());
         addNewMipsCode("lw", reg1, arrayAddr + "+" + itoa(shift * 4), "");
+        addNewMipsCode("sw", reg1, tVarAddr, "");//存储进临时变量在内存中的位置
     }
     else if(op2.substr(0, 1) == "#") { //如果是临时变量就用寄存器将变量的值加载至寄存器然后array($reg)
 //        int tIndex = std::atoi(op.substr(1, op.length()).c_str());
@@ -143,7 +144,7 @@ void getOverallArrayShiftAndAddMips(string arrayAddr, string op2, string reg1, s
  * @param reg2
  * @param tmpVarAddr 存储最终从数组中取出的值的临时变量的地址
  */
-void getInnerArrayShiftAndAddMips(FuncParamTableItem fpci, string op2, string reg1, string reg2, string tmpVarAddr) {
+void getInnerArrayShiftAndAddMips(FuncParamTableItem fpci, string op2, string reg1, string tmpVarAddr) {
     if(isANumber(op2)) {
         int shift = std::atoi(op2.c_str());
         int baseAddr = stringToInt(fpci.addr);
@@ -154,10 +155,11 @@ void getInnerArrayShiftAndAddMips(FuncParamTableItem fpci, string op2, string re
     }
     else if(op2.substr(0, 1) == "#") { //如果是临时变量则从相应地址中加载值进寄存器
         addNewMipsCode("lw", reg1, getTmpVarAddr(op2), "");
+        addNewMipsCode("mul", reg1, reg1, "4");//将地址乘4对齐
         addNewMipsCode("sub", reg1, reg1, fpci.addr);//reg1保存相对fp的偏移地址
         addNewMipsCode("sub", reg1, "$fp", reg1);
-        addNewMipsCode("lw", reg2, reg1, "");//从reg1中存储的地址中加载值
-        addNewMipsCode("sw", reg2, tmpVarAddr, "");
+        addNewMipsCode("lw", reg1, "(" + reg1 + ")", "");//从reg1中存储的地址中加载值
+        addNewMipsCode("sw", reg1, tmpVarAddr, "");
     }
     else { //如果是全局变量或者局部变量
         vector<string> findResult = findInAllTable(op2);
@@ -167,8 +169,8 @@ void getInnerArrayShiftAndAddMips(FuncParamTableItem fpci, string op2, string re
             addNewMipsCode("mul", reg1, reg1, "4");//将值乘4作为偏移
             addNewMipsCode("sub", reg1, reg1, fpci.addr);//reg1保存相对fp的偏移地址
             addNewMipsCode("sub", reg1, "$fp", reg1);
-            addNewMipsCode("lw", reg2, "(" + reg1 + ")", "");//从reg1中存储的地址中加载值
-            addNewMipsCode("sw", reg2, tmpVarAddr, "");
+            addNewMipsCode("lw", reg1, "(" + reg1 + ")", "");//从reg1中存储的地址中加载值
+            addNewMipsCode("sw", reg1, tmpVarAddr, "");
         }
         else { //如果是局部变量
             FuncParamTableItem tmpFpci = funcParamTable[index];
@@ -176,8 +178,8 @@ void getInnerArrayShiftAndAddMips(FuncParamTableItem fpci, string op2, string re
             addNewMipsCode("mul", reg1, reg1, "4");//将值乘4作为偏移
             addNewMipsCode("sub", reg1, reg1, fpci.addr);//reg1保存相对fp的偏移地址
             addNewMipsCode("sub", reg1, "$fp", reg1);
-            addNewMipsCode("lw", reg2, "(" + reg1 + ")", "");//从reg1中存储的地址中加载值
-            addNewMipsCode("sw", reg2, tmpVarAddr, "");
+            addNewMipsCode("lw", reg1, "(" + reg1 + ")", "");//从reg1中存储的地址中加载值
+            addNewMipsCode("sw", reg1, tmpVarAddr, "");
         }
     }
 }
@@ -210,9 +212,9 @@ void assignArrayShiftAndAddMips(string op1, string op2, string op3, string reg1,
     }
 
     if(isANumber(op2)) { //如果op2是一个数字
-        addNewMipsCode("li", reg2, op2, "");//将要赋的值存储在reg2
+        addNewMipsCode("li", reg2, op2, "");//将数组偏移存储在reg2
     }
-    else if(op2.substr(0, 1) == "#") { //如果op2是一个全局变量
+    else if(op2.substr(0, 1) == "#") { //如果op2是一个临时变量
         addNewMipsCode("lw", reg2, getTmpVarAddr(op1), "");
     }
     else {
@@ -228,10 +230,13 @@ void assignArrayShiftAndAddMips(string op1, string op2, string op3, string reg1,
 
     vector<string> findResult3 = findInAllTable(op3);
     if(findResult3.at(1) == "overall") { //如果是一个全局变量
-        addNewMipsCode("la", reg3, op3, "");//将全局变量的地址加载到寄存器
-        addNewMipsCode("mul", reg2, reg2, "4");//将下标乘4作为偏移地址
-        addNewMipsCode("add", reg3, reg3, reg2);//将地址加上reg2的偏移
-        addNewMipsCode("sw", reg1, "(" + reg3 + ")", "");//将reg1的值存储到指定地址
+        addNewMipsCode("mul", reg2, reg2, "4");//将reg2中存储的偏移乘4
+        addNewMipsCode("sw", reg1, op3 + "(" + reg2 + ")", "");
+
+//        addNewMipsCode("la", reg3, op3, "");//将全局变量的地址加载到寄存器
+//        addNewMipsCode("mul", reg2, reg2, "4");//将下标乘4作为偏移地址
+//        addNewMipsCode("add", reg3, reg3, reg2);//将地址加上reg2的偏移
+//        addNewMipsCode("sw", reg1, "(" + reg3 + ")", "");//将reg1的值存储到指定地址
     }
     else {
         FuncParamTableItem fpti = funcParamTable[stringToInt(findResult3.at(2))];
@@ -397,7 +402,6 @@ void generateFunc(QuadCodeTableItem qcti) {
 //    addNewMipsCode("sw", "$ra", "-4($fp)", "");//保存返回地址
 //    addNewMipsCode("sw", "$v0", "-8($fp)", "");//保存返回值
 
-    vector<string> findResult;
     string reg1;
     string reg2;
     string reg3;
@@ -573,7 +577,7 @@ void generateFunc(QuadCodeTableItem qcti) {
                     getOverallArrayShiftAndAddMips(op1, op2, "$t8", "$t9", getTmpVarAddr(op3));
                 } else {
                     FuncParamTableItem fpti = funcParamTable[stringToInt(findResult1.at(2))];
-                    getInnerArrayShiftAndAddMips(fpti, op2, "$t8", "$9", getTmpVarAddr(op3));
+                    getInnerArrayShiftAndAddMips(fpti, op2, "$t8", getTmpVarAddr(op3));
                 }
                 break;
             }
@@ -583,7 +587,7 @@ void generateFunc(QuadCodeTableItem qcti) {
                     getOverallArrayShiftAndAddMips(op1, op2, "$t8", "$t9", getTmpVarAddr(op3));
                 } else {
                     FuncParamTableItem fpti = funcParamTable[stringToInt(findResult1.at(2))];
-                    getInnerArrayShiftAndAddMips(fpti, op2, "$t8", "$9", getTmpVarAddr(op3));
+                    getInnerArrayShiftAndAddMips(fpti, op2, "$t8", getTmpVarAddr(op3));
                 }
                 break;
             }
@@ -706,7 +710,7 @@ void generateFunc(QuadCodeTableItem qcti) {
                             addNewMipsCode("sw", reg1, "($sp)", "");
                         } else {
                             vector<string> findResult1 = findInAllTable(op1);
-                            if (findResult.at(1) == "overall") { //如果是全局变量
+                            if (findResult1.at(1) == "overall") { //如果是全局变量
                                 addNewMipsCode("lw", reg1, op1, "");
                                 addNewMipsCode("sw", reg1, "($sp)", "");
                             } else { //如果是局部变量

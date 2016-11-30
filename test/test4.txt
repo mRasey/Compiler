@@ -1,0 +1,247 @@
+const int i3 = 3;
+const char c1 = '_';
+const int i1 = 1, i2 = 2;
+const char c2 = '+', c3 = '-';
+
+int vi1, vi2, vi3[20], vi4[30];
+int vi5[10], vi6;
+int vi7;
+int vi8[30];
+char vc1, vc2, vc3[20], vc4[30];
+char vc5[10], vc6;
+char vc7;
+char vc8[30];
+
+int def_test1(int a, int b){
+    return(a);
+}
+int def_test2(){
+    int vi1, vi2, vi3[20], vi4[30];
+    int vi5[10], vi6;
+    int vi7;
+    int vi8[30];
+    char vc1, vc2, vc3[20], vc4[30];
+    char vc5[10], vc6;
+    char vc7;
+    char vc8[30];
+    return(1);
+}
+void def_test3(char a, char b){
+    int vi1, vi2, vi3[20], vi4[30];
+    int vi5[10], vi6;
+    int vi7;
+    int vi8[30];
+    return;
+}
+char def_test4(){
+    const int i1 = 1, i2 = 2;
+    const char c1 = '_';
+    const int i3 = 3;
+    const char c2 = '+', c3 = '-';
+    return(c1);
+}
+
+void var_foo(){
+    vi1 = 3;
+    vi2 = 3;
+    vi3[5] = 3;
+    vi4[5] = 3;
+
+    printf("global 3 ", vi1);
+    printf("global 3 ", vi2);
+    printf("global 3 ", vi3[5]);
+    printf("global 3 ", vi4[5]);
+}
+void var_test(){
+    const int i1 = 2, ii1 = 2;
+    int vi1, vii1, vi3[20], vii3[20];
+    vi1 = 4;
+    vii1 = 4;
+    vi3[5] = 4;
+    vii3[5] = 4;
+    var_foo();
+
+    printf("local 2 ",i1);
+    printf("global 2 ",i2);
+    printf("local 2 ",ii1);
+
+    printf("local 4 ",vi1);
+    printf("global 3 ",vi2);
+    printf("local 4 ",vii1);
+
+    printf("local 4 ",vi3[5]);
+    printf("global 3 ",vi4[5]);
+    printf("local 4 ",vii3[5]);
+}
+
+void if_test(){
+    const char a = 'a', b = 'b', c = 'c';
+    int i;
+
+    scanf(i);
+    if(i>10)   printf(a);
+    else printf(b);
+
+    scanf(i);
+    if(i>10)
+        if(i>20)
+            printf(a);
+        else
+            printf(b);
+    printf(c);
+
+    scanf(i);
+    if(i>10)
+        if(i>20)
+            printf(a);
+        else
+            printf(b);
+    else
+        printf(c);
+
+    return;
+}
+
+void do_while_test(){
+    int i,j,n;
+    int sum,sum2;
+
+    scanf(n);
+
+    sum = 0;
+    i = 0;
+    do{
+        sum = sum+i;
+        i=i+1;
+    }while(i<=n)
+    if(sum == n*(n+1)/2){
+        printf("right");
+    }
+    else{
+        printf("wrong");
+    }
+
+    i = 0;
+    sum2 = 0;
+    do{
+        j = 0;
+        sum = 0;
+        do{
+            sum = sum + j;
+            j=j+1;
+        }while(j<=i);
+        sum2 = sum2+sum;
+        i=i+1;
+    }while(i<=n)
+    if(sum2 == (n*(n+1)*(2*n+1)/6+n*(n+1)/2)/2){
+        printf("right");
+    }
+    else{
+        printf("wrong");
+    }
+
+    return;
+}
+
+void for_test(int n){
+    int i,j;
+    int sum,sum2;
+
+    sum = 0;
+    for(i = 0;i<=n;i=i+1)
+        sum = sum + i;
+    if(sum != n*(n+1)/2){
+        printf("wrong");
+    }
+    else{
+        printf("right");
+    }
+
+    sum2 = 0;
+    for(i = 0;i<=n;i=i+1){
+        sum = 0;
+        for(j=i;j>0;j=j-1)
+            sum = sum+j;
+        sum2 = sum2 + sum;
+    }
+    if(sum2 != (n*(n+1)*(2*n+1)/6+n*(n+1)/2)/2){
+        printf("wrong");
+    }
+    else{
+        printf("right");
+    }
+
+    return;
+}
+
+void print_test(
+    int a, int b,
+    int c, int d,
+    char e, char f)
+{
+    printf("the sum of a b c d is ",a+b+c+d);
+    printf("e: ",e);
+    printf("f: ",f);
+}
+void scan_test(){
+    int a, b, c, d;
+    char e, f;
+    scanf(a,b,c,d,e,f);
+    print_test(a,b,c,d,e,f);
+    return;
+}
+
+int foo1(){
+    return (20);
+}
+
+int foo2(int a, int b){
+    return (a+b);
+}
+
+void expression_test(){
+
+    const int a = 1, b = 2, c = 3;
+    int i,k,arr[10];
+
+    i = a+b;
+    printf(i);
+    i = a*b;
+    printf(i);
+    i = a*(b+c);
+    printf(i);
+
+    for(i=0;i<10;i=i+1)
+        arr[i] = i;
+    k = 5;
+    printf(--6+a*b*(-c)/(c-a*b+foo2(arr[b*(2*a+c)-arr[k]],arr[arr[arr[k]]])*b-foo1()*(-'a'+'b'))+0);
+    return;
+}
+
+int recursion_test(int i){
+    if(i == 0)
+        return (0);
+    else
+        return (recursion_test(i-1)+i);
+}
+
+void main(){
+
+    int n;
+
+    var_test();
+
+    if_test();
+
+    do_while_test();
+
+    scanf(n);
+    for_test(n);
+
+    scan_test();
+
+    expression_test();
+
+    scanf(n);
+    printf(recursion_test(n));
+}

@@ -10,6 +10,7 @@ void emptyfunc2(){}
 char testchar(){     
     return ('0');
 }
+
 int fibonacci (int n){    
     const int cona = -1;        
     char testc;
@@ -90,7 +91,7 @@ void main(){
             }while(i<10)
     }
     if(c == 2)
-     hanoi(num, cond, cone, conf); 
+     hanoi(num, cond, cone, conf);
     else if(c==3) {
         fib = fibonacci(num);
         printf(fib);
@@ -139,4 +140,3 @@ void main(){
    
     return;
 }
-
