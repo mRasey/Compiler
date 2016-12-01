@@ -11,12 +11,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9df26d9-5dd1-4665-afa5-7f6083089ed4" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/14061131_王震_代码生成程序[可执行].zip" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Compiler.dir/main.cpp.o" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Compiler.dir/main.cpp.o" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/Compiler" afterPath="$PROJECT_DIR$/cmake-build-debug/Compiler" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-    </list>
+    <list default="true" id="f9df26d9-5dd1-4665-afa5-7f6083089ed4" name="Default" comment="" />
     <ignored path="Compiler.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -35,11 +30,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Analysis.cpp" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Analysis.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Analysis.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="148">
-              <caret line="1622" column="45" lean-forward="false" selection-start-line="1622" selection-start-column="45" selection-end-line="1622" selection-end-column="45" />
+            <state relative-caret-position="268">
+              <caret line="746" column="42" lean-forward="true" selection-start-line="746" selection-start-column="42" selection-end-line="746" selection-end-column="42" />
               <folding>
                 <element signature="e#1015#1032#0" expanded="false" />
                 <element signature="e#1015#5346#0" expanded="false" />
@@ -130,7 +125,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main.cpp" pinned="false" current-in-tab="true">
+      <file leaf-file-name="main.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="210">
@@ -203,9 +198,9 @@
       <find>qplus</find>
       <find>qget</find>
       <find>vi3</find>
-      <find>&quot;lw&quot;</find>
       <find>dealfor</find>
       <find>arr</find>
+      <find>&quot;lw&quot;</find>
     </findStrings>
     <replaceStrings>
       <replace>#end_</replace>
@@ -532,12 +527,12 @@
       <workItem from="1480047451262" duration="97307000" />
       <workItem from="1480260375109" duration="777000" />
       <workItem from="1480344662994" duration="40977000" />
-      <workItem from="1480499114492" duration="24080000" />
+      <workItem from="1480499114492" duration="24559000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="263749000" />
+    <option name="totallyTimeSpent" value="264228000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />
@@ -784,6 +779,40 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/test/test4.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9">
+          <caret line="144" column="0" lean-forward="false" selection-start-line="144" selection-start-column="0" selection-end-line="144" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/14061131_test.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="91" column="38" lean-forward="true" selection-start-line="91" selection-start-column="38" selection-end-line="91" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/testCode.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="32" column="17" lean-forward="true" selection-start-line="32" selection-start-column="17" selection-end-line="32" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="11" lean-forward="true" selection-start-line="14" selection-start-column="11" selection-end-line="14" selection-end-column="11" />
+          <folding>
+            <element signature="e#39#60#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Generate.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="279">
@@ -796,8 +825,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Analysis.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="1622" column="45" lean-forward="false" selection-start-line="1622" selection-start-column="45" selection-end-line="1622" selection-end-column="45" />
+        <state relative-caret-position="268">
+          <caret line="746" column="42" lean-forward="true" selection-start-line="746" selection-start-column="42" selection-end-line="746" selection-end-column="42" />
           <folding>
             <element signature="e#1015#1032#0" expanded="false" />
             <element signature="e#1015#5346#0" expanded="false" />
@@ -859,40 +888,6 @@
             <element signature="e#51010#51038#0" expanded="false" />
             <element signature="e#51801#51820#0" expanded="false" />
             <element signature="e#52655#52670#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/test4.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9">
-          <caret line="144" column="0" lean-forward="false" selection-start-line="144" selection-start-column="0" selection-end-line="144" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/14061131_test.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="396">
-          <caret line="91" column="38" lean-forward="true" selection-start-line="91" selection-start-column="38" selection-end-line="91" selection-end-column="38" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/testCode.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="32" column="17" lean-forward="true" selection-start-line="32" selection-start-column="17" selection-end-line="32" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" column="11" lean-forward="true" selection-start-line="14" selection-start-column="11" selection-end-line="14" selection-end-column="11" />
-          <folding>
-            <element signature="e#39#60#0" expanded="true" />
           </folding>
         </state>
       </provider>
