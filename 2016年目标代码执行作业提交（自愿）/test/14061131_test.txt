@@ -1,0 +1,96 @@
+const int _x = 0, m = 2;
+const char y = 'b';
+int z, h[20];
+char n, i[10];
+
+int foo(int a, int b)
+{
+  if(a > b)
+    printf("big\n");
+  if(a < b)
+    printf("less\n");
+  if(a >= b)
+    printf("big or equal\n");
+  if(a <= b)
+    printf("less or equal\n");
+  if(a != b)
+    printf("not equal\n");
+  if(a == b)
+    printf("equal\n");
+  return (233);
+}
+
+void foo2()
+{
+  int i;
+
+  for(i = 0; i < 10; i = i + 1)
+  {
+    printf(i);
+  }
+
+  do
+  {
+    printf(i);
+    i = i - 1;
+  } while(i > 0)
+}
+
+int foo3(int i)
+{
+  printf(i);
+  if(i == 10) {
+    return (i);
+    }
+  return (i + foo3(i+1));
+}
+
+void foo4(int a, int b)
+{
+  printf(a - b);
+  printf(a + b);
+  printf(a * b);
+  printf(a / b);
+}
+char foo5()
+{
+  char a;
+  char b;
+  a = 'a';
+  b = 'b';
+  return (a + b);
+}
+
+int foo6()
+{
+  int a[2];
+  a[0] = 1;
+  a[1] = 2;
+  a[2] = a[0] * (a[1] + foo5()) * foo(1, 2);
+  return (a[2]);
+}
+
+int fibonacci (int n){
+    if (n == 0) return (1);
+    if(n==1) return (1);
+    if (n == 2) return (2);
+    if(n!=2) return (fibonacci(n-1)+fibonacci(n-2));
+}
+
+void main()
+{
+  int a;
+  char b;
+  scanf(b);
+  printf(b);
+  a = foo(2, 3);
+  foo2();
+  foo3(1);
+  foo4(1, 2);
+  printf("foo6(): ", foo6());
+  printf("\n");
+  printf("fibonacci: ", fibonacci(6));
+  return;
+}
+
+
