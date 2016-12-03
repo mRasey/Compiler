@@ -5,6 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/Users/billy/Documents/Github/Compiler/Analysis.cpp" "/Users/billy/Documents/Github/Compiler/cmake-build-debug/CMakeFiles/Compiler.dir/Analysis.cpp.o"
+  "/Users/billy/Documents/Github/Compiler/ErrorInfo.cpp" "/Users/billy/Documents/Github/Compiler/cmake-build-debug/CMakeFiles/Compiler.dir/ErrorInfo.cpp.o"
   "/Users/billy/Documents/Github/Compiler/Generate.cpp" "/Users/billy/Documents/Github/Compiler/cmake-build-debug/CMakeFiles/Compiler.dir/Generate.cpp.o"
   "/Users/billy/Documents/Github/Compiler/main.cpp" "/Users/billy/Documents/Github/Compiler/cmake-build-debug/CMakeFiles/Compiler.dir/main.cpp.o"
   )

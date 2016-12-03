@@ -150,6 +150,33 @@ Analysis.cpp.s:
 	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/Analysis.cpp.s
 .PHONY : Analysis.cpp.s
 
+ErrorInfo.o: ErrorInfo.cpp.o
+
+.PHONY : ErrorInfo.o
+
+# target to build an object file
+ErrorInfo.cpp.o:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/ErrorInfo.cpp.o
+.PHONY : ErrorInfo.cpp.o
+
+ErrorInfo.i: ErrorInfo.cpp.i
+
+.PHONY : ErrorInfo.i
+
+# target to preprocess a source file
+ErrorInfo.cpp.i:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/ErrorInfo.cpp.i
+.PHONY : ErrorInfo.cpp.i
+
+ErrorInfo.s: ErrorInfo.cpp.s
+
+.PHONY : ErrorInfo.s
+
+# target to generate assembly for a file
+ErrorInfo.cpp.s:
+	$(MAKE) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/ErrorInfo.cpp.s
+.PHONY : ErrorInfo.cpp.s
+
 Generate.o: Generate.cpp.o
 
 .PHONY : Generate.o
@@ -216,6 +243,9 @@ help:
 	@echo "... Analysis.o"
 	@echo "... Analysis.i"
 	@echo "... Analysis.s"
+	@echo "... ErrorInfo.o"
+	@echo "... ErrorInfo.i"
+	@echo "... ErrorInfo.s"
 	@echo "... Generate.o"
 	@echo "... Generate.i"
 	@echo "... Generate.s"

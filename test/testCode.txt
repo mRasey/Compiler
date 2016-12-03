@@ -1,34 +1,8 @@
-void for_test(int n){
-    int i,j;
-    int sum,sum2;
-
-    sum = 0;
-    for(i = 0;i<=n;i=i+1)
-        sum = sum + i;
-    if(sum != n*(n+1)/2){
-        printf("wrong");
-    }
-    else{
-        printf("right");
-    }
-
-    sum2 = 0;
-    for(i = 0;i<=n;i=i+1){
-        sum = 0;
-        for(j=i;j>0;j=j-1)
-            sum = sum+j;
-        sum2 = sum2 + sum;
-    }
-    if(sum2 != (n*(n+1)*(2*n+1)/6+n*(n+1)/2)/2){
-        printf("wrong");
-    }
-    else{
-        printf("right");
-    }
-
-    return;
-}
 
 void main() {
-    for_test(10);
+    int i;
+    do {
+        i = i + 1;
+    } while (i < 10
+
 }

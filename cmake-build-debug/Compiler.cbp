@@ -88,6 +88,12 @@
 		<Unit filename="/Users/billy/Documents/Github/Compiler/Analysis.h">
 			<Option target="Compiler"/>
 		</Unit>
+		<Unit filename="/Users/billy/Documents/Github/Compiler/ErrorInfo.cpp">
+			<Option target="Compiler"/>
+		</Unit>
+		<Unit filename="/Users/billy/Documents/Github/Compiler/ErrorInfo.h">
+			<Option target="Compiler"/>
+		</Unit>
 		<Unit filename="/Users/billy/Documents/Github/Compiler/Generate.cpp">
 			<Option target="Compiler"/>
 		</Unit>

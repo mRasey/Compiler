@@ -9,6 +9,8 @@
 /Users/billy/Documents/Github/Compiler/Analysis.cpp
 Analysis.h
 /Users/billy/Documents/Github/Compiler/Analysis.h
+Generate.h
+/Users/billy/Documents/Github/Compiler/Generate.h
 
 /Users/billy/Documents/Github/Compiler/Analysis.h
 string
@@ -29,6 +31,16 @@ sstream
 -
 iomanip
 -
+ErrorInfo.h
+/Users/billy/Documents/Github/Compiler/ErrorInfo.h
+
+/Users/billy/Documents/Github/Compiler/ErrorInfo.cpp
+ErrorInfo.h
+/Users/billy/Documents/Github/Compiler/ErrorInfo.h
+
+/Users/billy/Documents/Github/Compiler/ErrorInfo.h
+Analysis.h
+/Users/billy/Documents/Github/Compiler/Analysis.h
 
 /Users/billy/Documents/Github/Compiler/Generate.cpp
 fstream

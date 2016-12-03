@@ -14,6 +14,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include "ErrorInfo.h"
 
 using namespace std;
 
@@ -145,7 +146,7 @@ typedef struct {
     char charValue = '\0';//如果是字符型，记录char值
     int refToOtherTable;//连接其他表的索引
     int address;//所处内存的地址
-    ReservedWord returnType;//函数返回值类型
+    ReservedWord returnType = Void;//函数返回值类型
     int paramAddr;//如果是函数名则记录在函数参数表的起始地址
     int paramAccount;//如果是函数名则记录参数表参数的个数
     int localVarAccount;//记录函数局部变量的个数
@@ -207,7 +208,7 @@ void getNextSymbolAndType() ;
 char* getTypeToString(char* symbol) ;
 void output(char* s) ;
 void printAllSymbol() ;
-void jumpToNextLine() ;
+void jumpToNext(ReservedWord symbolType) ;
 int findTokenInTable(string symbol) ;
 bool findFuncParamTable(TokenTableItem* tti, char* symbol) ;
 vector<string> findInAllTable(string symbol) ;

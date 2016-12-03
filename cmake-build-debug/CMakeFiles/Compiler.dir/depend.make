@@ -3,12 +3,20 @@
 
 CMakeFiles/Compiler.dir/Analysis.cpp.o: ../Analysis.cpp
 CMakeFiles/Compiler.dir/Analysis.cpp.o: ../Analysis.h
+CMakeFiles/Compiler.dir/Analysis.cpp.o: ../ErrorInfo.h
+CMakeFiles/Compiler.dir/Analysis.cpp.o: ../Generate.h
+
+CMakeFiles/Compiler.dir/ErrorInfo.cpp.o: ../Analysis.h
+CMakeFiles/Compiler.dir/ErrorInfo.cpp.o: ../ErrorInfo.cpp
+CMakeFiles/Compiler.dir/ErrorInfo.cpp.o: ../ErrorInfo.h
 
 CMakeFiles/Compiler.dir/Generate.cpp.o: ../Analysis.h
+CMakeFiles/Compiler.dir/Generate.cpp.o: ../ErrorInfo.h
 CMakeFiles/Compiler.dir/Generate.cpp.o: ../Generate.cpp
 CMakeFiles/Compiler.dir/Generate.cpp.o: ../Generate.h
 
 CMakeFiles/Compiler.dir/main.cpp.o: ../Analysis.h
+CMakeFiles/Compiler.dir/main.cpp.o: ../ErrorInfo.h
 CMakeFiles/Compiler.dir/main.cpp.o: ../Generate.h
 CMakeFiles/Compiler.dir/main.cpp.o: ../main.cpp
 

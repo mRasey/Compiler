@@ -742,8 +742,8 @@ void generateFunc(QuadCodeTableItem qcti) {
                     if (getIndex < 4) { //如果小于4则从a寄存器里取值
                         addNewMipsCode("sw", "$a" + itoa(getIndex), itoa(-(getIndex + 3) * 4) + "($fp)", "");
                     } else { //否则从栈中取值
-                        addNewMipsCode("lw", reg1, itoa((i - 4) * 4) + "($fp)", "");
-                        addNewMipsCode("sw", reg1, itoa((getIndex - 3) * 4) + "($fp)", "");
+                        addNewMipsCode("lw", reg1, itoa((i - 5) * 4) + "($fp)", "");
+                        addNewMipsCode("sw", reg1, itoa(-(getIndex + 3) * 4) + "($fp)", "");
                         i--;
                     }
                     qcti = qCodeInstrs[qCodeTableScanner++];
