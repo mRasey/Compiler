@@ -8,3 +8,4 @@ void main() {
     a[1] = 1231;
     printf(a[1]);
 }
+

@@ -10,9 +10,9 @@ Interval intervals[100];//间隔符表
 Keyword keywords[100];//关键字表
 TokenTableItem tokenTable[1024];//符号表
 int tokenTablePointer = 1;//符号表指针，从1开始，0表示未找到
-CodeTableItem codeTable[1024];//代码表
+CodeTableItem codeTable[4096];//代码表
 int codeTablePointer;//代码表指针
-QuadCodeTableItem quadCodeTable[1024];//四元式表
+QuadCodeTableItem quadCodeTable[2048];//四元式表
 int quadCodeTablePointer;//四元式表指针
 FuncParamTableItem funcParamTable[1024];//函数表
 int funcParamTablePointer = 0;//函数表指针
@@ -43,6 +43,13 @@ int lineNum = 0;
 int maxTmpVarIndex = 0;
 bool ifCanGenerated = true;//是否可以生成代码
 string preLine  = "";
+bool hasMainFunc = false;
+int braceCount = 0;
+bool inDealFunc = false;
+bool finishOverallConst = false;
+bool finishOverallVar = false;
+bool finishInnerConst = false;
+bool finishInnerVar = false;
 
 /**
  * 初始化间隔符
@@ -366,6 +373,8 @@ bool isKeyword(char* s) {
  */
 bool isNumber(char* s) {
     int i;
+    if(s[0] == '0' && strlen(s) > 1)
+        return false;
     for(i = 0; i < strlen(s); i++) {
         if(s[i] < '0' || s[i] > '9')
             return false;
@@ -593,14 +602,21 @@ char* getNextSymbol() {
  */
 void getNextSymbolAndType() {
     if(getNextSymbol() == NULL) { //获取下一个token
-        if(ifCanGenerated) {
-            printAllQCode();
-            printTokenTable();
-            printFuncParamTable();
-            generateAll();
-//        printToMipsFile();
+        try {
+            if(!hasMainFunc)
+                throw 32;
+            if (ifCanGenerated) {
+                printAllQCode();
+                printTokenTable();
+                printFuncParamTable();
+                generateAll();
+                printToMipsFile();
+            } else {
+                cout << "\n生成失败" << endl;
+            }
         }
-        else {
+        catch (int e) {
+            errorHandler(e);
             cout << "\n生成失败" << endl;
         }
         exit(0);
@@ -616,6 +632,10 @@ void getNextSymbolAndType() {
     for(int i = 0; i < keywordsLength; i++) {
         if(strcmp(keywords[i].symbol, symbol) == 0) {
             symbolType = keywords[i].reservedWord;
+            if(symbolType == lBrace)
+                braceCount++;
+            else if(symbolType == rBrace)
+                braceCount--;
             return;
         }
     }
@@ -759,6 +779,8 @@ vector<string> findInAllTable(string symbol) {
  */
 void dealOverallConst() {
     try {
+        if(finishOverallConst)
+            throw 34; //todo 非法的全局常量声明位置
         while (symbolType != semicolon) {
             TokenTableItem *tti = &tokenTable[tokenTablePointer++];
             getNextSymbolAndType();
@@ -770,7 +792,7 @@ void dealOverallConst() {
                         getNextSymbolAndType();//读取常量名
                         if (symbolType != customObj)
                             throw 6; //todo 使用了保留字的容错
-                        if (findInAllTable(symbol).at(0) == "true")
+                        if(findTokenInTable(symbol) != 0)
                             throw 1; //todo 重定义的容错处理
                         tti->name = symbol;//记录变量名
                         getNextSymbolAndType();//读取=号
@@ -781,13 +803,13 @@ void dealOverallConst() {
                             tti->intValue = atoi(symbol);//记录常量值
                         else if (symbolType == sub) {
                             getNextSymbolAndType();
-                            if (isNumber(symbol))
+                            if (isNumber(symbol) && atoi(symbol) != 0)
                                 tti->intValue = -1 * atoi(symbol);
                             else
                                 throw 3; //todo 赋值不是数字的容错处理
                         } else if (symbolType == Plus) {
                             getNextSymbolAndType();
-                            if (isNumber(symbol))
+                            if (isNumber(symbol) && atoi(symbol) != 0)
                                 tti->intValue = atoi(symbol);
                             else
                                 throw 3; //todo 赋值不是数字的容错处理
@@ -813,15 +835,14 @@ void dealOverallConst() {
                         getNextSymbolAndType();//读取常量名
                         if (symbolType != customObj)
                             throw 6; //todo 使用了保留字的容错
-                        if (findInAllTable(symbol).at(0) == "true")
+                        if(findTokenInTable(symbol) != 0)
                             throw 1; //todo 重定义的容错处理
                         tti->name = symbol;
-                        throw 1; //todo 重定义的容错处理
                         getNextSymbolAndType();//读取=号
                         if (symbolType != assign)
                             throw 2; //todo 缺少赋值号的容错
                         getNextSymbolAndType();//读取常量值
-                        if (isChar(symbol))
+                        if (isChar(symbol) && symbolType == aChar)
                             tti->charValue = symbol[0];//将字符串转为单个字符
                         else {
                             throw 3; //todo 非法赋值的容错
@@ -879,14 +900,14 @@ void dealInnerConst(TokenTableItem *tti) {
                                 fpti->intValue = atoi(symbol);//记录常量值
                             } else if (symbolType == sub) {
                                 getNextSymbolAndType();
-                                if (isNumber(symbol)) {
+                                if (isNumber(symbol) && atoi(symbol) != 0) {
                                     fpti->intValue = -1 * atoi(symbol);
                                 } else {
                                     throw 15;//todo 非法数字的容错处理
                                 }
                             } else if (symbolType == Plus) {
                                 getNextSymbolAndType();
-                                if (isNumber(symbol)) {
+                                if (isNumber(symbol) && atoi(symbol) != 0) {
                                     fpti->intValue = atoi(symbol);
                                 } else {
                                     throw 15;//todo 非法数字的容错处理
@@ -925,7 +946,7 @@ void dealInnerConst(TokenTableItem *tti) {
                             if (symbolType != assign)
                                 throw 2; //todo 不是赋值号的容错
                             getNextSymbol();//读取常量值
-                            if (isChar(symbol)) {
+                            if (isChar(symbol) && symbolType == aChar) {
                                 fpti->charValue = symbol[0];//将字符串转为单个字符
 
                             } else {
@@ -971,15 +992,18 @@ void dealInnerConst(TokenTableItem *tti) {
  */
 void dealOverallVar(ReservedWord recordType) {
     try {
+        finishOverallConst = true;
+        if(finishOverallVar)
+            throw 35; //todo 非法的全局变量的声明位置
         while (symbolType != semicolon) {
             TokenTableItem *tti = &tokenTable[tokenTablePointer++];//获取下一个表项
             tti->type = recordType;
             tti->obj = Var;//记录种类
             getNextSymbolAndType();
             if (symbolType == customObj) {
-                tti->name = symbol;
-                if(findInAllTable(symbol).at(0) == "true")
+                if(findTokenInTable(symbol) != 0)
                     throw 1; //todo 重定义的容错处理
+                tti->name = symbol;
                 getNextSymbolAndType();
                 if (symbolType == comma) { //如果是逗号表示当前一个变量声明完毕，继续当前行的分析
                     if (recordType == Int)
@@ -1123,21 +1147,21 @@ void dealAssign() {
             getNextSymbolAndType();//获取等号
             if (findResult.at(1) == "overall") { //是全局变量
                 TokenTableItem tti = tokenTable[index];
-                if (tti.type == Int) {
+                if (tti.type == Int && tti.obj != Const) {
                     emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
-                } else if (tti.type == Char) {
+                } else if (tti.type == Char && tti.obj != Const) {
                     emitQCode(qAssignChar, dealExpression(), recordSymbol, "");
                 } else {
-                    throw 17; //todo 非法赋值类型的容错处理
+                    throw 33; //todo 非法赋值类型的容错处理
                 }
             } else {
                 FuncParamTableItem fpti = funcParamTable[index];
-                if (fpti.type == Int) {
+                if (fpti.type == Int && fpti.obj != Const) {
                     emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
-                } else if (fpti.type == Char) {
+                } else if (fpti.type == Char && fpti.obj != Const) {
                     emitQCode(qAssignChar, dealExpression(), recordSymbol, "");
                 } else {
-                    throw 17; //todo 非法类型的容错处理
+                    throw 33; //todo 非法类型的容错处理
                 }
             }
         }
@@ -1574,12 +1598,12 @@ void dealForStep() {
             if (findResult.at(1) == "overall") { //如果是全局变量
                 TokenTableItem tti = tokenTable[index];
                 if (symbolType == assign) {
-                    if (tti.type == Int) {
+                    if (tti.type == Int && tti.obj != Const) {
                         emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
-                    } else if (tti.type == Char) {
+                    } else if (tti.type == Char && tti.obj != Const) {
                         emitQCode(qAssignChar, dealExpression(), recordSymbol, "");
                     } else {
-                        throw 17;//todo 非法的类型
+                        throw 33;//todo 非法的类型
                     }
                 } else {
                     throw 2;//todo 缺少赋值号的容错处理
@@ -1588,12 +1612,12 @@ void dealForStep() {
             } else { //局部变量
                 FuncParamTableItem fpti = funcParamTable[index];
                 if (symbolType == assign) {
-                    if (fpti.type == Int) {
+                    if (fpti.type == Int && fpti.obj != Const) {
                         emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
-                    } else if (fpti.type == Char) {
+                    } else if (fpti.type == Char && fpti.obj != Const) {
                         emitQCode(qAssignChar, dealExpression(), recordSymbol, "");
                     } else {
-                        throw 17; //todo 非法的类型
+                        throw 33; //todo 非法的类型
                     }
                 } else {
                     throw 2; //todo 缺少赋值号的容错处理
@@ -1602,33 +1626,6 @@ void dealForStep() {
         } else {
             throw 26;//todo 为找到合法变量定义的容错处理
         }
-
-//        if (tokenTable[findTokenInTable(symbol)].obj == Var) { //如果能找到并且是一个变量
-//            getNextSymbolAndType();//=号
-//            if (symbolType == assign) {
-//                getNextSymbolAndType();//运算标识符
-//                if (tokenTable[findTokenInTable(symbol)].type == Int
-//                    || tokenTable[findTokenInTable(symbol)].type == Char) {
-//                    getNextSymbolAndType();//加法运算符
-//                    if (symbolType == Plus || symbolType == sub) {
-//                        getNextSymbolAndType();//步长
-//                        if (isNumber(symbol)) {
-//                            //todo 生成四元式
-//                        } else {
-//                            //todo 步长不是无符号整数的容错处理
-//                        }
-//                    } else {
-//                        //todo 缺少运算符的容错处理
-//                    }
-//                } else {
-//                    //todo 左操作数不含有有效值得容错处理
-//                }
-//            } else {
-//                //todo 缺少赋值号的容错处理
-//            }
-//        } else {
-//            //todo 找不到变量或者给常量赋值的容错处理
-//        }
     }
     catch (int e) {
         errorHandler(e);
@@ -1785,10 +1782,12 @@ void dealStatement() {
                 } else {
                     getNextSymbolAndType();
                     if (symbolType == assign) {
-                        if (tti.type == Int)
+                        if (tti.type == Int  && tti.obj != Const)
                             emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
-                        else
+                        else if(tti.type == Char  && tti.obj != Const)
                             emitQCode(qAssignChar, dealExpression(), recordSymbol, "");
+                        else
+                            throw 33; //todo 给常量赋值的容错
                     } else {
                         throw 11; //todo 错误的语句类型的容错处理
                     }
@@ -1820,10 +1819,12 @@ void dealStatement() {
                 } else {
                     getNextSymbolAndType();
                     if (symbolType == assign) {
-                        if (fpti.type == Int)
+                        if (fpti.type == Int  && fpti.obj != Const)
                             emitQCode(qAssignInt, dealExpression(), recordSymbol, "");
-                        else
+                        else if(fpti.type == Char && fpti.obj != Const)
                             emitQCode(qAssignChar, dealExpression(), recordSymbol, "");
+                        else
+                            throw 33; //todo 给常量赋值的容错
                     } else {
                         throw 11; //todo 错误的语句类型的容错处理
                     }
@@ -1941,6 +1942,8 @@ void dealStatement() {
                 getNextSymbolAndType();//获取下一行的起始token
                 return;
             } else if (symbolType == rBrace) {
+                if(braceCount == 0)
+                    return;
                 throw 19;//todo 不应该出现的右花括号
                 return;
             } else {
@@ -2024,7 +2027,7 @@ void dealParamlist(TokenTableItem *tti) {
                     fpt->type = symbolType;
                     getNextSymbolAndType();
                     if (symbolType == customObj) {
-                        if(findInAllTable(symbol).at(0) == "true" && findInAllTable(symbol).at(1) == "param")
+                        if(findFuncParamTable(tti, symbol))
                             throw 1; //todo 重复定义的变量名
                         fpt->name = symbol;//记录参数名
                         if (recordType == Int) {
@@ -2063,6 +2066,8 @@ void dealParamlist(TokenTableItem *tti) {
  */
 void dealFunc(TokenTableItem *tti) {
     try {
+        finishOverallConst = true;
+        finishOverallVar = true;
         currentDealFunc = tti->name;
         emitQCode(qFuncLabel, getFuncLabel(tti->name), "", "");//生成函数标签
         dealParamlist(tti);
@@ -2097,100 +2102,121 @@ void dealFunc(TokenTableItem *tti) {
  * 语法分析程序
  */
 void grammaticalAnalysis() {
-    getNextSymbolAndType();
-    while(true) {
+    try {
+        getNextSymbolAndType();
+        while (true) {
 //        getNextSymbolAndType();
-        if (lineNowPos != lineLength || !feof(in)) { //如果没有读到文件末尾就一直往下读
-            try {
-                if (symbolType == Const) {
-                    dealOverallConst();
-                } else if (symbolType == Int || symbolType == Char) {
-                    ReservedWord recordType = symbolType;
-                    TokenTableItem *tti = &tokenTable[tokenTablePointer++];//获取下一个表项
-                    tti->type = symbolType;//保存类型
-                    getNextSymbolAndType();//获取下一个标识符
-                    if(findInAllTable(symbol).at(0) == "true")
-                        throw 1; //todo 重定义容错处理
-                    tti->name = symbol;
-                    getNextSymbolAndType();
-                    if (symbolType == lParent) { //如果是(表示是一个函数
-                        tti->obj = Func;
-                        tti->returnType = recordType;//记录函数返回类型
-                        dealFunc(tti);
-                    } else if (symbolType == lBracket) { //如果是[表明是一个声明数组变量语句
-                        tti->isArray = true;
-                        getNextSymbolAndType();//获取下一个token
-                        if (isNumber(symbol)) {
-                            tti->arraySize = atoi(symbol);
-                            if (recordType == Int)
-                                emitQCode(qNewIntArray, tti->name, itoa(tti->arraySize), "");
-                            else
-                                emitQCode(qNewCharArray, tti->name, itoa(tti->arraySize), "");
-                            //todo 数组声明过大的容错处理
-                            getNextSymbolAndType();
-                            if (symbolType == rBracket) {
+            if (lineNowPos != lineLength || !feof(in)) { //如果没有读到文件末尾就一直往下读
+                try {
+                    if (symbolType == Const) {
+                        if(finishOverallConst)
+                            throw 34; //todo 非法全局常量的声明
+                        dealOverallConst();
+                    } else if (symbolType == Int || symbolType == Char) {
+                        ReservedWord recordType = symbolType;
+                        TokenTableItem *tti = &tokenTable[tokenTablePointer++];//获取下一个表项
+                        tti->type = symbolType;//保存类型
+                        getNextSymbolAndType();//获取下一个标识符
+                        if (findTokenInTable(symbol) != 0)
+                            throw 1; //todo 重定义容错处理
+                        tti->name = symbol;
+                        if (tti->name == "main")
+                            throw 31; //todo main函数的返回值需为void
+                        getNextSymbolAndType();
+                        if (symbolType == lParent) { //如果是(表示是一个函数
+                            tti->obj = Func;
+                            tti->returnType = recordType;//记录函数返回类型
+                            dealFunc(tti);
+                        } else if (symbolType == lBracket) { //如果是[表明是一个声明数组变量语句
+                            finishOverallConst = true;
+                            if(finishInnerVar)
+                                throw 35; //todo 非法的声明全局变量位置
+                            tti->isArray = true;
+                            getNextSymbolAndType();//获取下一个token
+                            if (isNumber(symbol)) {
+                                tti->arraySize = atoi(symbol);
+                                if (recordType == Int)
+                                    emitQCode(qNewIntArray, tti->name, itoa(tti->arraySize), "");
+                                else
+                                    emitQCode(qNewCharArray, tti->name, itoa(tti->arraySize), "");
+                                //todo 数组声明过大的容错处理
                                 getNextSymbolAndType();
-                                if (symbolType == semicolon) {
+                                if (symbolType == rBracket) {
                                     getNextSymbolAndType();
-                                    continue;//继续下一行代码的处理
-                                }
-                                else if (symbolType == comma)
-                                    dealOverallVar(recordType);//继续处理当前行的变量声明
-                                else {
-                                    throw 4;//todo 非逗号且非分号的容错处理
+                                    if (symbolType == semicolon) {
+                                        getNextSymbolAndType();
+                                        continue;//继续下一行代码的处理
+                                    } else if (symbolType == comma)
+                                        dealOverallVar(recordType);//继续处理当前行的变量声明
+                                    else {
+                                        throw 4;//todo 非逗号且非分号的容错处理
+                                    }
+                                } else {
+                                    throw 9;//todo 数组缺少右中括号的容错处理
                                 }
                             } else {
-                                throw 9;//todo 数组缺少右中括号的容错处理
+                                throw 10;//todo 数组声明的下标不是数字的容错处理
+                            }
+                        } else if (symbolType == comma) { //如果是逗号表示一个声明变量语句
+                            finishOverallConst = true;
+                            if(finishInnerVar)
+                                throw 35; //todo 非法的声明全局变量位置
+                            tti->obj = Var;
+                            if (recordType == Int)
+                                emitQCode(qNewIntVar, tti->name, "", "");
+                            else
+                                emitQCode(qNewCharVar, tti->name, "", "");
+                            dealOverallVar(recordType);//继续处理逗号后面的变量声明
+                        } else if (symbolType == semicolon) { //如果是分号表示一个声明变量语句
+                            finishOverallConst = true;
+                            if(finishInnerVar)
+                                throw 35; //todo 非法的声明全局变量位置
+                            tti->obj = Var;
+                            if (recordType == Int)
+                                emitQCode(qNewIntVar, tti->name, "", "");
+                            else
+                                emitQCode(qNewCharVar, tti->name, "", "");
+                            getNextSymbolAndType();
+                        } else {
+                            throw 11;//todo 容错处理
+                        }
+                    } else if (symbolType == Void) {
+                        TokenTableItem *tti = &tokenTable[tokenTablePointer++];
+                        tti->returnType = Void;
+                        tti->obj = Func;
+                        getNextSymbolAndType();
+                        if (symbolType == customObj) {
+                            if (findTokenInTable(symbol) != 0)
+                                throw 1; //todo 重定义变量的容错
+                            tti->name = symbol;
+                            if (tti->name == "main")
+                                hasMainFunc = true; //如果出现了main函数置为true
+                            getNextSymbolAndType();
+                            if (symbolType == lParent) { //如果是左括号则开始处理函数参数表
+                                dealFunc(tti);
+                            } else {
+                                throw 12;//todo 函数声明缺少左括号的错误处理
                             }
                         } else {
-                            throw 10;//todo 数组声明的下标不是数字的容错处理
-                        }
-                    } else if (symbolType == comma) { //如果是逗号表示一个声明变量语句
-                        tti->obj = Var;
-
-                        if (recordType == Int)
-                            emitQCode(qNewIntVar, tti->name, "", "");
-                        else
-                            emitQCode(qNewCharVar, tti->name, "", "");
-
-                        dealOverallVar(recordType);//继续处理逗号后面的变量声明
-                    } else if (symbolType == semicolon) { //如果是分号表示一个声明变量语句
-                        tti->obj = Var;
-                        if (recordType == Int)
-                            emitQCode(qNewIntVar, tti->name, "", "");
-                        else
-                            emitQCode(qNewCharVar, tti->name, "", "");
-                        getNextSymbolAndType();
-
-                    } else {
-                        throw 11;//todo 容错处理
-                    }
-                } else if (symbolType == Void) {
-                    TokenTableItem *tti = &tokenTable[tokenTablePointer++];
-                    tti->returnType = Void;
-                    tti->obj = Func;
-                    getNextSymbolAndType();
-                    if (symbolType == customObj) {
-                        tti->name = symbol;
-                        getNextSymbolAndType();
-                        if (symbolType == lParent) { //如果是左括号则开始处理函数参数表
-                            dealFunc(tti);
-                        } else {
-                            throw 12;//todo 函数声明缺少左括号的错误处理
+                            throw 8;//todo 缺少函数名的容错处理
                         }
                     } else {
-                        throw 8;//todo 缺少函数名的容错处理
+                        throw 7;//todo 非声明语句的容错处理
                     }
-                } else {
-                    throw 7;//todo 非声明语句的容错处理
                 }
-            }
-            catch (int e) {
-                errorHandler(e);
-                jumpToNext(semicolon);
+                catch (int e) {
+                    errorHandler(e);
+                    jumpToNext(semicolon);
+                }
+            } else {
+                getNextSymbolAndType();
+                throw 7;
+                return;
             }
         }
-        else
-            return;
+    }
+    catch (int e) {
+        errorHandler(e);
+        jumpToNext(semicolon);
     }
 }

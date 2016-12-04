@@ -105,6 +105,27 @@ void errorHandler(int index) {
         case 30:
             cout << "缺少右花括号" << endl;
             break;
+        case 31:
+            cout << "main函数返回值必须为void型" << endl;
+            break;
+        case 32:
+            cout << "缺少main函数" << endl;
+            break;
+        case 33:
+            cout << "给常量赋值或赋值类型不匹配" << endl;
+            break;
+        case 34:
+            cout << "非法的声明全局常量的位置" << endl;
+            break;
+        case 35:
+            cout << "非法的声明全局变量的位置" << endl;
+            break;
+        case 36:
+            cout << "非法的声明局部常量的位置" << endl;
+            break;
+        case 37:
+            cout << "非法的声明局部变量的位置" << endl;
+            break;
         default:
             cout << "未知错误" << endl;
             break;
