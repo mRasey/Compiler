@@ -601,16 +601,18 @@ char* getNextSymbol() {
  * @return 如果找到则返回类型，否则返回用户自定义类型
  */
 void getNextSymbolAndType() {
+    string preSymbol = symbol;
     if(getNextSymbol() == NULL) { //获取下一个token
         try {
             if(!hasMainFunc)
                 throw 32;
+            if(preSymbol != "}")
+                throw 30; //todo 文件不以花括号结束
             if (ifCanGenerated) {
                 printAllQCode();
                 printTokenTable();
                 printFuncParamTable();
-                generateAll();
-                printToMipsFile();
+                generateAll(); //生成代码并输出到文件
             } else {
                 cout << "\n生成失败" << endl;
             }
@@ -2209,7 +2211,7 @@ void grammaticalAnalysis() {
                     jumpToNext(semicolon);
                 }
             } else {
-                getNextSymbolAndType();
+//                getNextSymbolAndType();
                 throw 7;
                 return;
             }

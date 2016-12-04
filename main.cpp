@@ -27,7 +27,7 @@ int main() {
 
     path = "/Users/billy/Documents/Github/Compiler/copy/copy.txt";
     ofstream out(path.c_str(), ios::app);
-    out << "\n\n";
+    out << "\t";
     out.close();
 
     in = fopen(path.c_str(), "r");
@@ -45,7 +45,6 @@ int main() {
             printTokenTable();
             printFuncParamTable();
             generateAll();
-            printToMipsFile();
         } else {
             cout << "\n生成失败" << endl;
         }
