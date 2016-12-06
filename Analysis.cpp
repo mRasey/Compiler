@@ -1842,9 +1842,14 @@ void dealStatement() {
             if (symbolType == Printf) {
                 getNextSymbolAndType();//(
                 if (symbolType == lParent) {
+                    int i = 0;
+                    bool hasStr = false;
+                    bool hasVar = false;
                     do {
                         string dealResult = dealExpression();
                         if (isAString || isAChar) {
+                            if(hasVar || hasStr)
+                                throw 39; //todo print参数错误
                             if (isAString) {
                                 printStrings[printStringsPointer] = dealResult;//记录所有string
                                 emitQCode(qPrintfString, "str_" + itoa(printStringsPointer++), "", "");
@@ -1853,9 +1858,16 @@ void dealStatement() {
                                 emitQCode(qPrintfChar, dealResult, "", "");
                                 isAChar = false;
                             }
+                            hasStr = true;
                         } else {
+                            if(hasVar)
+                                throw 39; //todo print参数错误
                             emitQCode(qPrintfInt, dealResult, "", "");
+                            hasVar = true;
                         }
+                        i++;
+                        if(i > 2)
+                            throw 38;
                     } while (symbolType == comma);
                     if(symbolType != rParent)
                         throw 23; //todo prinf以非右括号结束

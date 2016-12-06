@@ -1,0 +1,35 @@
+int a[10];
+
+void quicksort(int array[], int maxlen, int begin, int end)
+{
+    int i, j;
+
+    if(begin < end) {
+        i = begin + 1;
+        j = end;
+        while(i < j) {
+            if(array[i] > array[begin]) {
+                if(swap(array[i], array[j]) == 1)
+                    show(array, maxlen, begin, end); /* 只显示begin 到 end 下标间的数据 */
+                j = j - 1;
+            }
+            else
+                i++;
+        }
+        if (array > array[begin])
+            i--;
+
+        if(swap(&array[begin], &array[i]) == 1)
+            show(array, maxlen, begin, end);
+        quicksort(array, maxlen, begin, i);
+        quicksort(array, maxlen, j, end);
+    }
+}
+
+void main() {
+    a[0] = 12;
+    a[0] = 12;
+    a[0] = 12;
+    a[0] = 12;
+    a[0] = 12;
+}

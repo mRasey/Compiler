@@ -143,14 +143,16 @@ void getOverallIntArrayShiftAndAddMips(string arrayAddr, string op2, string reg1
 void getOverallCharArrayShiftAndAddMips(string arrayAddr, string op2, string reg1, string reg2, string tVarAddr) {
     if(isANumber(op2)) { //如果是数字则直接
         int shift = std::atoi(op2.c_str());
-        addNewMipsCode("lb", reg1, arrayAddr + "+" + itoa(shift * 4), "");
-        addNewMipsCode("sb", reg1, tVarAddr, "");//存储进临时变量在内存中的位置
+        addNewMipsCode("lw", reg1, arrayAddr + "+" + itoa(shift * 4), "");
+        addNewMipsCode("and", reg1, reg1, "0xFF");
+        addNewMipsCode("sw", reg1, tVarAddr, "");//存储进临时变量在内存中的位置
     }
     else if(op2.substr(0, 1) == "#") { //如果是临时变量就用寄存器将变量的值加载至寄存器然后array($reg)
 //        int tIndex = std::atoi(op.substr(1, op.length()).c_str());
         addNewMipsCode("lw", reg1, getTmpVarAddr(op2), "");//加载偏移至指定寄存器
-        addNewMipsCode("lb", reg2, arrayAddr + "(" + reg1 +  ")", "");//根据偏移加载数组值至指定寄存器
-        addNewMipsCode("sb", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
+        addNewMipsCode("lw", reg2, arrayAddr + "(" + reg1 +  ")", "");//根据偏移加载数组值至指定寄存器
+        addNewMipsCode("and", reg2, reg2, "0xFF");
+        addNewMipsCode("sw", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
     }
     else { //如果是全局或局部变量
         vector<string> findResult = findInAllTable(op2);
@@ -159,16 +161,18 @@ void getOverallCharArrayShiftAndAddMips(string arrayAddr, string op2, string reg
             TokenTableItem tti = tokenTable[index];
             addNewMipsCode("lw", reg1, op2, "");//通过标签加载值进内存
             addNewMipsCode("mul", reg1, reg1, "4");
-            addNewMipsCode("lb", reg2, arrayAddr + "(" + reg1 +  ")", "");//根据偏移加载数组值至指定寄存器
-            addNewMipsCode("sb", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
+            addNewMipsCode("lw", reg2, arrayAddr + "(" + reg1 +  ")", "");//根据偏移加载数组值至指定寄存器
+            addNewMipsCode("and", reg2, reg2, "0xFF");
+            addNewMipsCode("sw", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
         }
         else { //如果是局部变量
             int index = std::atoi(findResult.at(2).c_str());
             FuncParamTableItem fpti = funcParamTable[index];
             addNewMipsCode("lw", reg1, fpti.addr, "");//通过地址加载值进内存
             addNewMipsCode("mul", reg1, reg1, "4");
-            addNewMipsCode("lb", reg2, arrayAddr + "(" + reg1 +  ")", "");//根据偏移加载数组值至指定寄存器
-            addNewMipsCode("sb", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
+            addNewMipsCode("lw", reg2, arrayAddr + "(" + reg1 +  ")", "");//根据偏移加载数组值至指定寄存器
+            addNewMipsCode("and", reg2, reg2, "0xFF");
+            addNewMipsCode("sw", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
         }
     }
 }
@@ -235,16 +239,18 @@ void getInnerCharArrayShiftAndAddMips(FuncParamTableItem fpci, string op2, strin
         int baseAddr = stringToInt(fpci.addr);
         int shiftAddr = baseAddr - shift * 4;
         string shiftSp = itoa(shiftAddr) + "($fp)";
-        addNewMipsCode("lb", reg1, shiftSp, "");
-        addNewMipsCode("sb", reg1, tmpVarAddr, "");
+        addNewMipsCode("lw", reg1, shiftSp, "");
+        addNewMipsCode("and", reg1, reg1, "0xFF");
+        addNewMipsCode("sw", reg1, tmpVarAddr, "");
     }
     else if(op2.substr(0, 1) == "#") { //如果是临时变量则从相应地址中加载值进寄存器
         addNewMipsCode("lw", reg1, getTmpVarAddr(op2), "");
         addNewMipsCode("mul", reg1, reg1, "4");//将地址乘4对齐
         addNewMipsCode("sub", reg1, reg1, fpci.addr);//reg1保存相对fp的偏移地址
         addNewMipsCode("sub", reg1, "$fp", reg1);
-        addNewMipsCode("lb", reg1, "(" + reg1 + ")", "");//从reg1中存储的地址中加载值
-        addNewMipsCode("sb", reg1, tmpVarAddr, "");
+        addNewMipsCode("lw", reg1, "(" + reg1 + ")", "");//从reg1中存储的地址中加载值
+        addNewMipsCode("and", reg1, reg1, "0xFF");
+        addNewMipsCode("sw", reg1, tmpVarAddr, "");
     }
     else { //如果是全局变量或者局部变量
         vector<string> findResult = findInAllTable(op2);
@@ -254,8 +260,9 @@ void getInnerCharArrayShiftAndAddMips(FuncParamTableItem fpci, string op2, strin
             addNewMipsCode("mul", reg1, reg1, "4");//将值乘4作为偏移
             addNewMipsCode("sub", reg1, reg1, fpci.addr);//reg1保存相对fp的偏移地址
             addNewMipsCode("sub", reg1, "$fp", reg1);
-            addNewMipsCode("lb", reg1, "(" + reg1 + ")", "");//从reg1中存储的地址中加载值
-            addNewMipsCode("sb", reg1, tmpVarAddr, "");
+            addNewMipsCode("lw", reg1, "(" + reg1 + ")", "");//从reg1中存储的地址中加载值
+            addNewMipsCode("and", reg1, reg1, "0xFF");
+            addNewMipsCode("sw", reg1, tmpVarAddr, "");
         }
         else { //如果是局部变量
             FuncParamTableItem tmpFpci = funcParamTable[index];
@@ -263,8 +270,9 @@ void getInnerCharArrayShiftAndAddMips(FuncParamTableItem fpci, string op2, strin
             addNewMipsCode("mul", reg1, reg1, "4");//将值乘4作为偏移
             addNewMipsCode("sub", reg1, reg1, fpci.addr);//reg1保存相对fp的偏移地址
             addNewMipsCode("sub", reg1, "$fp", reg1);
-            addNewMipsCode("lb", reg1, "(" + reg1 + ")", "");//从reg1中存储的地址中加载值
-            addNewMipsCode("sb", reg1, tmpVarAddr, "");
+            addNewMipsCode("lw", reg1, "(" + reg1 + ")", "");//从reg1中存储的地址中加载值
+            addNewMipsCode("and", reg1, reg1, "0xFF");
+            addNewMipsCode("sw", reg1, tmpVarAddr, "");
         }
     }
 }
@@ -278,7 +286,7 @@ void getInnerCharArrayShiftAndAddMips(FuncParamTableItem fpci, string op2, strin
  * @param reg2
  * @param reg3
  */
-void assignArrayShiftAndAddMips(string op1, string op2, string op3, string reg1, string reg2, string reg3) {
+void assignIntArrayShiftAndAddMips(string op1, string op2, string op3, string reg1, string reg2, string reg3) {
     if(isANumber(op1)) { //如果op1是一个数字
         addNewMipsCode("li", reg1, op1, "");//将要赋的值存储在reg1
     }
@@ -328,6 +336,71 @@ void assignArrayShiftAndAddMips(string op1, string op2, string op3, string reg1,
         addNewMipsCode("add",reg3, "$fp", fpti.addr);//将数组的基地址保存在reg3中(记录的是负数)
         addNewMipsCode("mul", reg2, reg2, "4");//将下标乘4作为偏移地址
         addNewMipsCode("sub",reg3, reg3, reg2);//将保存在reg2中的下标的偏移地址作为基地址的偏移
+        addNewMipsCode("sw", reg1, "(" + reg3 + ")", "");//将reg1的值存储到reg3中的指定地址
+    }
+}
+
+/**
+ * 处理对数组赋值的指令并生成mips代码
+ * @param op1
+ * @param op2
+ * @param op3
+ * @param reg1
+ * @param reg2
+ * @param reg3
+ */
+void assignCharArrayShiftAndAddMips(string op1, string op2, string op3, string reg1, string reg2, string reg3) {
+    if(isANumber(op1)) { //如果op1是一个数字
+        addNewMipsCode("li", reg1, op1, "");//将要赋的值存储在reg1
+    }
+    else if(op1.substr(0, 1) == "#") { //如果op1是一个临时变量
+        addNewMipsCode("lw", reg1, getTmpVarAddr(op1), "");
+    }
+    else { //如果op1是全局或局部变量
+        vector<string> findResult1 = findInAllTable(op1);
+        if(findResult1.at(1) == "overall") { //如果是一个全局变量
+            addNewMipsCode("lw", reg1, op1, "");
+        }
+        else { //如果是一个局部变量
+            FuncParamTableItem fpti = funcParamTable[stringToInt(findResult1.at(2))];//取出在参数表中的项
+            addNewMipsCode("lw", reg1, fpti.addr, "");
+        }
+    }
+
+    if(isANumber(op2)) { //如果op2是一个数字
+        addNewMipsCode("li", reg2, op2, "");//将数组偏移存储在reg2
+    }
+    else if(op2.substr(0, 1) == "#") { //如果op2是一个临时变量
+        addNewMipsCode("lw", reg2, getTmpVarAddr(op1), "");
+    }
+    else {
+        vector<string> findResult2 = findInAllTable(op2);
+        if(findResult2.at(1) == "overall") { //如果op2是一个全局变量
+            addNewMipsCode("lw", reg2, op1, "");
+        }
+        else { //如果op2是一个局部变量
+            FuncParamTableItem fpti = funcParamTable[stringToInt(findResult2.at(2))];//取出在参数表中的项
+            addNewMipsCode("lw", reg2, fpti.addr, "");
+        }
+    }
+
+    vector<string> findResult3 = findInAllTable(op3);
+    if(findResult3.at(1) == "overall") { //如果是一个全局变量
+        addNewMipsCode("mul", reg2, reg2, "4");//将reg2中存储的偏移乘4
+        addNewMipsCode("and", reg1, reg1, "0xFF");
+        addNewMipsCode("sw", reg1, op3 + "(" + reg2 + ")", "");
+
+//        addNewMipsCode("la", reg3, op3, "");//将全局变量的地址加载到寄存器
+//        addNewMipsCode("mul", reg2, reg2, "4");//将下标乘4作为偏移地址
+//        addNewMipsCode("add", reg3, reg3, reg2);//将地址加上reg2的偏移
+//        addNewMipsCode("sw", reg1, "(" + reg3 + ")", "");//将reg1的值存储到指定地址
+    }
+    else {
+        FuncParamTableItem fpti = funcParamTable[stringToInt(findResult3.at(2))];
+        addNewMipsCode("add",reg3, "$fp", fpti.addr);//将数组的基地址保存在reg3中(记录的是负数)
+        addNewMipsCode("mul", reg2, reg2, "4");//将下标乘4作为偏移地址
+        addNewMipsCode("sub",reg3, reg3, reg2);//将保存在reg2中的下标的偏移地址作为基地址的偏移
+        addNewMipsCode("and", reg1, reg1, "0xFF");
         addNewMipsCode("sw", reg1, "(" + reg3 + ")", "");//将reg1的值存储到reg3中的指定地址
     }
 }
@@ -783,11 +856,11 @@ void generateFunc(QuadCodeTableItem qcti) {
                 break;
             }
             case qAssignIntArray: {
-                assignArrayShiftAndAddMips(op1, op2, op3, "$t7", "$t8", "$t9");
+                assignIntArrayShiftAndAddMips(op1, op2, op3, "$t7", "$t8", "$t9");
                 break;
             }
             case qAssignCharArray: {
-                assignArrayShiftAndAddMips(op1, op2, op3, "$t7", "$t8", "$t9");
+                assignCharArrayShiftAndAddMips(op1, op2, op3, "$t7", "$t8", "$t9");
                 break;
             }
             case qReverse: {
@@ -1024,9 +1097,9 @@ void generateFunc(QuadCodeTableItem qcti) {
  */
 void generateAll() {
     addNewMipsCode(".data", "", "", "");//声明data区
-    generateAllStrings();//声明所有的字符串
     generateOverallConst();//生成全局常量
     generateOverallVar();//生成全局变量
+    generateAllStrings();//声明所有的字符串
     addNewMipsCode(".text", "", "", "");//声明text区
     addNewMipsCode("move", "$fp", "$sp", "");//初始化sp
     addNewMipsCode("j", "main", "", "");//跳到main函数

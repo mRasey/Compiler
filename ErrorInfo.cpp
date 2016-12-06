@@ -126,6 +126,12 @@ void errorHandler(int index) {
         case 37:
             cout << "非法的声明局部变量的位置" << endl;
             break;
+        case 38:
+            cout << "printf有过多的参数" << endl;
+            break;
+        case 39:
+            cout << "printf参数错误" << endl;
+            break;
         default:
             cout << "未知错误" << endl;
             break;
