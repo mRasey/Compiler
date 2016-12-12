@@ -1,35 +1,26 @@
-int a[10];
-
-void quicksort(int array[], int maxlen, int begin, int end)
-{
-    int i, j;
-
-    if(begin < end) {
-        i = begin + 1;
-        j = end;
-        while(i < j) {
-            if(array[i] > array[begin]) {
-                if(swap(array[i], array[j]) == 1)
-                    show(array, maxlen, begin, end); /* 只显示begin 到 end 下标间的数据 */
-                j = j - 1;
-            }
-            else
-                i++;
-        }
-        if (array > array[begin])
-            i--;
-
-        if(swap(&array[begin], &array[i]) == 1)
-            show(array, maxlen, begin, end);
-        quicksort(array, maxlen, begin, i);
-        quicksort(array, maxlen, j, end);
-    }
-}
-
-void main() {
-    a[0] = 12;
-    a[0] = 12;
-    a[0] = 12;
-    a[0] = 12;
-    a[0] = 12;
-}
+procedure sort(i,j:longint);
+var x,y,z:longint;
+var tmp:longint;
+begin
+    x:=i;
+    y:=j;
+    Z:=d[(i+j)/2];
+    
+    repeat
+        
+        while z<d[y] do y:=y-1;
+        while z>d[x] do x:=x+1;
+        if x<=y then
+        begin
+            tmp:=d[x];
+            d[x]:=d[y];
+            d[y]:=tmp;
+            x:=x+1;
+            y:=y-1;
+        end;
+        
+    until x>y;
+    
+    if x<j then sort(x,j);
+    if i<y then sort(i,y);
+end;

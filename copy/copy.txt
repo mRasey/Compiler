@@ -1,14 +1,11 @@
-
+int i;
 
 void main() {
-    int a[10];
-    int sum;
-    int i;
-    for(i = 0; i < 10; i = i + 1) {
-        a[i] = i;
-    }
-    for(i = 0; i < 10; i = i + 1) {
-        sum = sum + a[i];
-    }
-    printf(sum);
+    scanf(i);
+    if(i == 0)
+        printf("i is 0");
+    if(i == 1)
+        printf("i is 1");
+    if(i == 2)
+        printf("i is 2");
 }	

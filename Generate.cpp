@@ -112,6 +112,7 @@ void getOverallIntArrayShiftAndAddMips(string arrayAddr, string op2, string reg1
     else if(op2.substr(0, 1) == "#") { //如果是临时变量就用寄存器将变量的值加载至寄存器然后array($reg)
 //        int tIndex = std::atoi(op.substr(1, op.length()).c_str());
         addNewMipsCode("lw", reg1, getTmpVarAddr(op2), "");//加载偏移至指定寄存器
+        addNewMipsCode("mul", reg1, reg1, "4");
         addNewMipsCode("lw", reg2, arrayAddr + "(" + reg1 +  ")", "");//根据偏移加载数组值至指定寄存器
         addNewMipsCode("sw", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
     }
@@ -150,6 +151,7 @@ void getOverallCharArrayShiftAndAddMips(string arrayAddr, string op2, string reg
     else if(op2.substr(0, 1) == "#") { //如果是临时变量就用寄存器将变量的值加载至寄存器然后array($reg)
 //        int tIndex = std::atoi(op.substr(1, op.length()).c_str());
         addNewMipsCode("lw", reg1, getTmpVarAddr(op2), "");//加载偏移至指定寄存器
+        addNewMipsCode("mul", reg1, reg1, "4");
         addNewMipsCode("lw", reg2, arrayAddr + "(" + reg1 +  ")", "");//根据偏移加载数组值至指定寄存器
         addNewMipsCode("and", reg2, reg2, "0xFF");
         addNewMipsCode("sw", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
@@ -1118,7 +1120,7 @@ void generateAll() {
  */
 void printToMipsFile() {
     ofstream outFile;
-    outFile.open("/Users/billy/Documents/Github/Compiler/14061131_test.mips");
+    outFile.open("/Users/billy/Documents/Github/Compiler/14061131_test.asm");
     for(int i = 0; i < codeTablePointer; i++) {
         CodeTableItem *cti = &codeTable[i];
         outFile << left << setw(10) << cti->name;

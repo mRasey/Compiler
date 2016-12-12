@@ -38,6 +38,7 @@ int printStringsPointer = 0;
 
 bool isAString = false;
 bool isAChar = false;
+bool isACharVar = false;
 bool isAlreadyRecordParamAddr = false;
 int lineNum = 0;
 int maxTmpVarIndex = 0;
@@ -527,7 +528,10 @@ char* getNextSymbol() {
     if(lineNowPos == lineLength) { //如果当前行已经读取完，读取下一行进缓冲区
         preLine = readIn;
         if(!feof(in)) {
+            memset(readIn, 0, 1024);
             fgets(readIn, 1024, in);
+            if(readIn[0] == '\0')
+                return NULL;
         } else {
 //            printf("end of the file\n");  //如果下一行为EOF，则返回null
             return NULL;
@@ -577,6 +581,14 @@ char* getNextSymbol() {
                         break;
                     symbolAppend(temp);
                 }while(1);
+                if(temp != oldTemp) {
+                    if(oldTemp == '\'')
+                        throw 42; //todo 缺少'
+                    if(oldTemp == '\"')
+                        throw 41; //todo 缺少"
+                }
+                if(oldTemp == '\'' && symbol[1] != '\0')
+                    throw 40; //todo 不合法的字符声明
             }
             else if (temp == '+' || temp == '-' || temp == '*' || temp == '/')  {
                 symbolAppend(temp);
@@ -1344,7 +1356,7 @@ string dealFactor() {
                         getNextSymbolAndType();
                         return recordSymbol;
                     } else if (fpti.type == Char) { //如果是char型返回char值
-                        isAChar = true;
+                        isACharVar = true;
                         string recordSymbol = symbol;
                         getNextSymbolAndType();
                         return recordSymbol;
@@ -1382,7 +1394,8 @@ string dealFactor() {
             getNextSymbolAndType();//获取下一行的token
             return recordSymbol;
         } else if (isChar(symbol)) { //如果是一个字符
-            isAChar = true;
+            throw 26; //todo 无意义的字母
+//            isAChar = true;
             string recordSymbol = symbol;
             getNextSymbolAndType();
             return recordSymbol;
@@ -1847,19 +1860,15 @@ void dealStatement() {
                     bool hasVar = false;
                     do {
                         string dealResult = dealExpression();
-                        if (isAString || isAChar) {
-                            if(hasVar || hasStr)
+                        if (isAString) {
+                            if(hasStr || hasVar)
                                 throw 39; //todo print参数错误
-                            if (isAString) {
-                                printStrings[printStringsPointer] = dealResult;//记录所有string
-                                emitQCode(qPrintfString, "str_" + itoa(printStringsPointer++), "", "");
-                                isAString = false;
-                            } else if (isAChar) {
-                                emitQCode(qPrintfChar, dealResult, "", "");
-                                isAChar = false;
-                            }
+                            printStrings[printStringsPointer] = dealResult;//记录所有string
+                            emitQCode(qPrintfString, "str_" + itoa(printStringsPointer++), "", "");
+                            isAString = false;
                             hasStr = true;
-                        } else {
+                        }
+                        else {
                             if(hasVar)
                                 throw 39; //todo print参数错误
                             emitQCode(qPrintfInt, dealResult, "", "");
@@ -2215,6 +2224,7 @@ void grammaticalAnalysis() {
                             throw 8;//todo 缺少函数名的容错处理
                         }
                     } else {
+                        cout << "error" << endl;
                         throw 7;//todo 非声明语句的容错处理
                     }
                 }

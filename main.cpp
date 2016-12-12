@@ -19,17 +19,6 @@ int main() {
     string path;
     cin >> path;
 
-    ifstream in1;
-    in1.open(path.c_str(), ios::binary);
-    ofstream out1("/Users/billy/Documents/Github/Compiler/copy/copy.txt",ios::binary);
-    out1 << in1.rdbuf();
-    out1.close();
-
-    path = "/Users/billy/Documents/Github/Compiler/copy/copy.txt";
-    ofstream out(path.c_str(), ios::app);
-    out << "\t";
-    out.close();
-
     in = fopen(path.c_str(), "r");
 //    in = fopen("/Users/billy/Documents/Github/Compiler/test/14061131_test.txt", "r");
 //    in = fopen("/Users/billy/Documents/Github/Compiler/test/testCode.txt", "r");

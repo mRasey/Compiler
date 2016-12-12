@@ -177,8 +177,7 @@ void for_test(int n){
 void print_test(
     int a, int b,
     int c, int d,
-    char e, char f)
-{
+    char e, char f) {
     printf("the sum of a b c d is ",a+b+c+d);
     printf("e: ",e);
     printf("f: ",f);
@@ -244,4 +243,5 @@ void main(){
 
     scanf(n);
     printf(recursion_test(n));
+
 }
