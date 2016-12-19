@@ -25,7 +25,12 @@ int main() {
 //    in = fopen("/Users/billy/Documents/Github/Compiler/test/test.txt", "r");
 //    in = fopen("/Users/billy/Documents/Github/Compiler/test/publictest.txt", "r");
 //    in = fopen("/Users/billy/Documents/Github/Compiler/test/test4.txt", "r");
-    grammaticalAnalysis();
+    try {
+        grammaticalAnalysis();
+    }
+    catch (exception& e) {
+        cout << "\n生成失败" << endl;
+    }
 //    printAllSymbol();
     try {
         if (!hasMainFunc)

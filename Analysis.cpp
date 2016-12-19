@@ -1283,6 +1283,7 @@ string dealCallFunc(int index) {
 string dealFactor() {
     try {
         isAChar = false;
+        isACharVar = false;
 //    printf("this is a factor\t\t\t%s\n", readIn);
         //已经获得运算符的后一个token
         if (symbolType == aChar) { //如果是一个字符则直接返回字符的ascii码
@@ -1311,6 +1312,7 @@ string dealFactor() {
                         emitQCode(qGetArrayIntValue, tti.name, dealExpression(), newTmpVar);
                     } else {
                         emitQCode(qGetArrayCharValue, tti.name, dealExpression(), newTmpVar);
+                        isACharVar = true;
                     }
                     getNextSymbolAndType();//获取下一行token
                     return newTmpVar;
@@ -1319,6 +1321,7 @@ string dealFactor() {
                     if (tti.returnType == Int) { //return int
                         return dealCallFunc(index);
                     } else if (tti.returnType == Char) { //return char
+                        isACharVar = true;
                         return dealCallFunc(index);
                     } else { //return void
                         //todo 使用了无返回值函数的容错处理
@@ -1329,6 +1332,7 @@ string dealFactor() {
                         getNextSymbolAndType();
                         return recordSymbol;
                     } else if (tti.type == Char) { //如果是char型返回char值
+                        isACharVar = true;
                         string recordSymbol = symbol;
                         getNextSymbolAndType();
                         return recordSymbol;
@@ -1344,10 +1348,13 @@ string dealFactor() {
                         throw 9; //todo 缺少左中括号
                     string newTmpVar = getNextTmpVar();
                     //计算数组下标相应的值
-                    if (fpti.type == Int)
+                    if (fpti.type == Int) {
                         emitQCode(qGetArrayIntValue, fpti.name, dealExpression(), newTmpVar);
-                    else
+                    }
+                    else {
                         emitQCode(qGetArrayCharValue, fpti.name, dealExpression(), newTmpVar);
+                        isACharVar = true;
+                    }
                     getNextSymbolAndType();//获取下一行token
                     return newTmpVar;
                 } else { //非数组及函数的标识符
@@ -1439,6 +1446,8 @@ string dealTerm() {
                 emitQCode(qDiv, factor1, dealFactor(), newTmp);
                 factor1 = newTmp;
             }
+            isACharVar = false;
+            isAChar = false;
         }
         else {
             break;
@@ -1488,6 +1497,8 @@ string dealExpression() {
                     emitQCode(qSub, term1, dealTerm(), newTmpVar);
                     term1 = newTmpVar;
                 }
+                isACharVar = false;
+                isAChar = false;
             } else if (symbolType == rParent
                        || symbolType == semicolon
                        || symbolType == comma
@@ -1871,7 +1882,10 @@ void dealStatement() {
                         else {
                             if(hasVar)
                                 throw 39; //todo print参数错误
-                            emitQCode(qPrintfInt, dealResult, "", "");
+                            if(isACharVar)
+                                emitQCode(qPrintfChar, dealResult, "", "");
+                            else
+                                emitQCode(qPrintfInt, dealResult, "", "");
                             hasVar = true;
                         }
                         i++;

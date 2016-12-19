@@ -106,8 +106,10 @@ string getTmpVarAddr(string tmpVar) {
 void getOverallIntArrayShiftAndAddMips(string arrayAddr, string op2, string reg1, string reg2, string tVarAddr) {
     if(isANumber(op2)) { //如果是数字则直接
         int shift = std::atoi(op2.c_str());
-        addNewMipsCode("lw", reg1, arrayAddr + "+" + itoa(shift * 4), "");
-        addNewMipsCode("sw", reg1, tVarAddr, "");//存储进临时变量在内存中的位置
+        addNewMipsCode("li", reg1, itoa(shift * 4), "");
+        addNewMipsCode("lw", reg2, arrayAddr + "(" + reg1 + ")", "");
+//        addNewMipsCode("lw", reg2, arrayAddr + "+" + itoa(shift * 4), "");
+        addNewMipsCode("sw", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
     }
     else if(op2.substr(0, 1) == "#") { //如果是临时变量就用寄存器将变量的值加载至寄存器然后array($reg)
 //        int tIndex = std::atoi(op.substr(1, op.length()).c_str());
@@ -144,9 +146,11 @@ void getOverallIntArrayShiftAndAddMips(string arrayAddr, string op2, string reg1
 void getOverallCharArrayShiftAndAddMips(string arrayAddr, string op2, string reg1, string reg2, string tVarAddr) {
     if(isANumber(op2)) { //如果是数字则直接
         int shift = std::atoi(op2.c_str());
-        addNewMipsCode("lw", reg1, arrayAddr + "+" + itoa(shift * 4), "");
-        addNewMipsCode("and", reg1, reg1, "0xFF");
-        addNewMipsCode("sw", reg1, tVarAddr, "");//存储进临时变量在内存中的位置
+        addNewMipsCode("li", reg1, itoa(shift * 4), "");
+        addNewMipsCode("lw", reg2, arrayAddr + "(" + reg1 + ")", "");
+//        addNewMipsCode("lw", reg2, arrayAddr + "+" + itoa(shift * 4), "");
+        addNewMipsCode("and", reg2, reg2, "0xFF");
+        addNewMipsCode("sw", reg2, tVarAddr, "");//存储进临时变量在内存中的位置
     }
     else if(op2.substr(0, 1) == "#") { //如果是临时变量就用寄存器将变量的值加载至寄存器然后array($reg)
 //        int tIndex = std::atoi(op.substr(1, op.length()).c_str());
