@@ -78,7 +78,8 @@ void init() {
     intervals[19].symbol = '\n';
     intervals[20].symbol = '!';
     intervals[21].symbol = '\t';
-    intervalsLength = 22;
+    intervals[22].symbol = '\r';
+    intervalsLength = 23;
 
     keywords[0].symbol = "int";
     keywords[0].reservedWord = Int;
@@ -622,8 +623,8 @@ void getNextSymbolAndType() {
                 throw 30; //todo 文件不以花括号结束
             if (ifCanGenerated) {
                 printAllQCode();
-                printTokenTable();
-                printFuncParamTable();
+//                printTokenTable();
+//                printFuncParamTable();
                 generateAll(); //生成代码并输出到文件
             } else {
                 cout << "\n生成失败" << endl;
@@ -1915,13 +1916,18 @@ void dealStatement() {
                     if (result.at(0) == "true") {
                         if (result.at(1) == "overall") { //是全局变量
                             TokenTableItem tti = tokenTable[index];
+                            if(tti.obj == Func || tti.isArray || tti.obj == Const)
+                                throw 43; //todo 用函数名或数组作为函数参数的容错
                             if (tti.type == Int) {
                                 emitQCode(qScanfInt, symbol, "", "");
-                            } else {
+                            }
+                            else {
                                 emitQCode(qScanfChar, symbol, "", "");
                             }
                         } else {
                             FuncParamTableItem fpti = funcParamTable[index];
+                            if(fpti.isArray || fpti.obj == Const)
+                                throw 43; //todo 用数组作为函数参数的容错
                             if (fpti.type == Int) {
                                 emitQCode(qScanfInt, symbol, "", "");
                             } else {

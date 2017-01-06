@@ -183,6 +183,9 @@ void errorHandler(int index) {
 //            cout << "缺少右引号的字符声明" << endl;
             cout << "A character declaration that lacks a right quote" << endl;
             break;
+        case 43:
+            cout << "error in scanf" << endl;
+            break;
         default:
 //            cout << "未知错误" << endl;
             cout << "unknown error" << endl;

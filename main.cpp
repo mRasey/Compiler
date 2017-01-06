@@ -25,6 +25,11 @@ int main() {
 //    in = fopen("/Users/billy/Documents/Github/Compiler/test/test.txt", "r");
 //    in = fopen("/Users/billy/Documents/Github/Compiler/test/publictest.txt", "r");
 //    in = fopen("/Users/billy/Documents/Github/Compiler/test/test4.txt", "r");
+//    in = fopen("/Users/billy/Documents/Github/Compiler/test/correct_test_1.txt", "r");
+//    in = fopen("/Users/billy/Documents/Github/Compiler/test/correct_test_2.txt", "r");
+//    in = fopen("/Users/billy/Documents/Github/Compiler/test/correct_test_3.txt", "r");
+//    in = fopen("/Users/billy/Documents/Github/Compiler/test/correct_test_4.txt", "r");
+//    in = fopen("/Users/billy/Documents/Github/Compiler/test/correct_test_5.txt", "r");
     try {
         grammaticalAnalysis();
     }
@@ -37,8 +42,8 @@ int main() {
             throw 32;
         if (ifCanGenerated) {
             printAllQCode();
-            printTokenTable();
-            printFuncParamTable();
+//            printTokenTable();
+//            printFuncParamTable();
             generateAll();
         } else {
             cout << "\n生成失败" << endl;

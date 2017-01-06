@@ -1,10 +1,6 @@
-char j[10];
-
-char foo() {
-    return ('a');
-}
-
 void main() {
-    j[0] = 'a';
-    printf(j[0] + 0);
+    int i, j, k;
+    i = 1;
+    j = 2;
+    k = (i + j) + (i + j) + (i + j);
 }

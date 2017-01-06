@@ -1,0 +1,111 @@
+const char C_1 = 'W', C_2 = 'T', C_3 = 'L';int a_sort [10];
+int mod (int x, int y) {
+	int z;
+	z = x / y;
+	return (x - y * z);
+}
+int gcd (int x, int y) {
+	if (x < y)
+		return (gcd (y, x));
+	if (y == 0)
+		return (x);
+	return (gcd (y, mod (x, y)));
+}
+int pow (int x, int y) {
+	int i, res;
+	i = 0;
+	res = 1;
+	if  (i < y) 
+		do{
+			res = res * x; 
+			i = i + 1;
+		}while(i<y);
+	return (res);
+} 
+void sort () {
+	int i, j, temp;
+	i = 9;
+	if(i > 0) 
+	do{
+		j = 0;
+		if(j < i) do{
+			if (a_sort[j] > a_sort[j + 1]) {
+				temp = a_sort[j];
+				a_sort[j] = a_sort[j + 1];
+				a_sort[j + 1] = temp;
+			}	
+			j = j + 1;
+		}while(j<i);
+		i = i - 1;
+	}while(i>0);
+}
+void main () {
+	int num, i;
+	int a_user_1 [10], a_user_2 [10], a_temp [10];
+	i = 0;
+	if (i <= 19) do{
+		scanf(num);
+		if(mod (i, 2) == 0) 
+			a_user_1[i / 2] = num;
+		else 
+			a_user_2[i / 2] = num; 
+		
+		i = i + 1;
+	}while(i<=19);
+	i = 0;
+	if (i <= 9) do{
+		a_sort[i] = a_user_1[i];
+		i = i + 1;
+	}while(i<=9);
+	sort ();
+	i = 0;
+	if (i <= 9) do{
+		a_user_1[i] = a_sort[i];
+		a_temp[i] = a_sort[i];
+		i = i + 1;
+	}while(i<=9)
+	i = 0;
+	if(i <= 9) do{
+		a_sort[i] = a_user_2[i];
+		i = i + 1;
+	}while(i<=9);
+	sort ();
+	i = 0;
+	if (i <= 9) do{
+		a_user_2[i] = a_sort[i];
+		i = i + 1;
+	}while(i<=9)
+	i = 0;
+	if (i <= 9) do{
+		a_user_1[i] = gcd (pow (a_user_1[i], 2), a_user_2[i]);
+		i = i + 1;
+	}while(i<=9)
+	i = 0;
+	if(i <= 9) do{
+		a_user_2[i] = gcd (a_temp[i], pow (a_user_2[i], 2));
+		i = i + 1;
+	}while(i<=9);
+	i = 0;
+	if (i <= 9) do{
+		num = a_user_1[i] - a_user_2[i];
+		if (num < 0)
+			num = -num;
+		if(mod (num, 3) == 0) 
+			{
+				printf("USER1 vs USER2 : ", C_2);
+				printf(" at ROUND", i + 1);
+				printf("...");
+			}else if (mod (num, 3) == 1){
+				printf("USER1 vs USER2 : ", C_1);
+				printf(" at ROUND", i + 1);
+				printf("...");
+			}
+			else{
+				printf("USER1 vs USER2 : ", C_3);
+				printf(" at ROUND", i + 1);
+				printf("...");
+			}
+		
+		i = i + 1;
+	}while(i<=9);
+}

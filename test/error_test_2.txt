@@ -1,0 +1,53 @@
+char test_char() {
+  char a;
+  char b;
+  a = 'a';
+  b = 'b';
+  return (a + b);
+}
+
+int test_int() {
+  a[0] = 1;
+  a[1] = 2;
+  a[2] = a[0] * (a[1] + 666);
+  return (a[2]);
+}
+
+char test_char_array() {
+    char a[2];
+    a[0] = 'a';
+    a[1] = 'b';
+    a[2] = a[0] + a[1];
+    return (a[2]);
+}
+
+int test_int_array() {
+    int a[2];
+    a[0] = 1;
+    a[1] = 2;
+    a[2] = a[0] * a[1];
+    return (a[2]);
+}
+
+int foo(int j, int k) {
+    int a, b, c;
+    int d[10];
+    a = 123;
+    b = 456;
+    c = 789;
+    d[9] = 233;
+    a = d[9] * (k - j) + a / (b - c) * c * a;
+    return (a);
+}
+
+void main() {
+    printf("test_char: ", test_char());
+    printf("\n");
+    printf("test_int: ", test_int());
+    printf("\n");
+    printf("test_char_array: ", test_char_array());
+    printf("\n");
+    printf("test_int_array: ", test_int_array());
+    printf("\n");
+    printf("foo: ", foo(2, 3));
+}

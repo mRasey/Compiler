@@ -1,0 +1,46 @@
+void test_loop() {
+    int i, j, k;
+    int num;
+    for(i = 0; i < 10; i = i + 1) {
+        for(j = 0; j < 10; j = j + 1) {
+            for(k = 0; k < 10; k = k + 1) {
+                num = i * 100 + j * 10 + k;
+                printf(num);
+                printf("\n");
+            }
+        }
+    }
+
+    for(i = 0; i < 10; i = i + 1)
+            for(j = 0; j < 10; j = j + 1)
+                for(k = 0; k < 10; k = k + 1)
+                    printf(i * 100 + j * 10 + k)
+
+    do {
+        i = i - 1;
+        j = 10;
+        k = 10;
+        do {
+            j = j - 1;
+            k = 10;
+            do {
+                k = k - 1;
+                num = i * 100 + j * 10 + k;
+                printf(num);
+                printf("\n");
+            } while(k > 0)
+        } while(j > 0)
+    } while(i > 0)
+
+    do
+        do
+            do
+                printf("do...while\n");
+            while(k != 0)
+        while(j != 0)
+    while(i != 0)
+}
+
+void main() {
+    test_loop();
+}

@@ -1,0 +1,44 @@
+int foo(int a, int b)
+{
+    printf("a:", a);
+    printf(" b:", b);
+    printf("\n");
+    if(a > b)
+        printf("big\n");
+    if(a < b)
+        printf("less\n");
+    if(a >= b)
+        printf("big or equal\n");
+    if(a <= b)
+        printf("less or equal\n");
+    if(a != b)
+        printf("not equal\n");
+    if(a == b)
+        printf("equal\n");
+    return (233);
+}
+
+void foo4()
+{
+    int a b;
+    printf("a:");
+    scanf(a);
+    printf("b:");
+    scanf(b);
+    printf("a - b = ", a - b);
+    printf("\n");
+    printf("a + b = ", a + b);
+    printf("\n");
+    printf("a * b = ", a * b);
+    printf("\n");
+    printf("a / b = ", a / b);
+    printf("\n");
+}
+
+void main()
+{
+    foo(2, 3);
+    foo4();
+}
+
+
